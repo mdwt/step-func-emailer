@@ -1,12 +1,12 @@
 # step-func-emailer
 
-Serverless email sequences on AWS. Step Functions for orchestration, SES for delivery, DynamoDB for state. No servers, no polling, no cron jobs.
+Serverless email sequences on AWS. Step Functions for orchestration, SES for delivery, DynamoDB for state. 
 
-Build onboarding drips, event-triggered sequences, and transactional emails with durable wait states that cost nothing while they wait. Manage everything through Claude Code via the MCP server — no dashboard needed.
+Build onboarding drips, event-triggered sequences, and transactional emails. Manage everything through Claude Code via the MCP server — no dashboard needed.
 
 ## How it works
 
-Your app publishes events to EventBridge. Each event either starts a Step Functions sequence or fires a single email through the shared Send Lambda. The Lambda fetches an HTML template from S3, renders it with LiquidJS, and sends it through SES. Subscriber state, execution tracking, and send logs live in DynamoDB. Engagement events (opens, clicks, deliveries) are tracked in a separate table and queryable through the MCP server.
+Your app publishes events to EventBridge. Each event starts a Step Functions sequence. The Lambda fetches an HTML template from S3, renders it with LiquidJS, and sends it through SES. Subscriber state, execution tracking, and send logs live in DynamoDB. Engagement events (opens, clicks, deliveries) are tracked in a separate table and queryable through the MCP server.
 
 ```
 App backend → EventBridge → Step Functions → Send Lambda → SES

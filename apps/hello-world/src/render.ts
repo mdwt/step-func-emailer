@@ -12,11 +12,23 @@ import * as path from "node:path";
 const EMAILS_DIR = path.join(__dirname, "emails");
 const OUT_DIR = path.join(__dirname, "../../../out");
 
+function collectTemplates(dir: string, relDir = ""): string[] {
+  const results: string[] = [];
+  for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (entry.isDirectory()) {
+      results.push(...collectTemplates(path.join(dir, entry.name), path.join(relDir, entry.name)));
+    } else if (entry.name.endsWith(".tsx")) {
+      results.push(path.join(relDir, entry.name));
+    }
+  }
+  return results;
+}
+
 async function main() {
   // Ensure output directory exists
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
-  const files = fs.readdirSync(EMAILS_DIR).filter((f) => f.endsWith(".tsx"));
+  const files = collectTemplates(EMAILS_DIR);
 
   for (const file of files) {
     const modulePath = path.join(EMAILS_DIR, file);
@@ -37,7 +49,9 @@ async function main() {
     );
 
     const outName = file.replace(/\.tsx$/, ".html");
-    fs.writeFileSync(path.join(OUT_DIR, outName), html);
+    const outPath = path.join(OUT_DIR, outName);
+    fs.mkdirSync(path.dirname(outPath), { recursive: true });
+    fs.writeFileSync(outPath, html);
     console.log(`Rendered: ${outName}`);
   }
 
