@@ -1,5 +1,11 @@
 # create-step-func-emailer
 
+## 0.2.2
+
+### Patch Changes
+
+- Add packageManager field to scaffolded project template
+
 ## 0.2.1
 
 ### Patch Changes
