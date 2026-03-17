@@ -1,14 +1,7 @@
 import type { SNSEvent } from "aws-lambda";
-import {
-  DynamoDBClient,
-  PutItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import {
-  subscriberPK,
-  eventSK,
-  EVENT_TTL_DAYS,
-} from "@step-func-emailer/shared";
+import { subscriberPK, eventSK, EVENT_TTL_DAYS } from "@step-func-emailer/shared";
 import type { EmailEventType } from "@step-func-emailer/shared";
 import { resolveConfig } from "../lib/ssm-config.js";
 
@@ -120,11 +113,9 @@ export const handler = async (event: SNSEvent): Promise<void> => {
 
     // Extract templateKey and sequenceId from custom headers set by ses-sender
     const templateKey = getHeader(notification.mail.headers, "X-Template-Key");
-    const sequenceId =
-      getHeader(notification.mail.headers, "X-Sequence-Id") || "fire_and_forget";
+    const sequenceId = getHeader(notification.mail.headers, "X-Sequence-Id") || "fire_and_forget";
 
-    const linkUrl =
-      notification.eventType === "Click" ? notification.click.link : undefined;
+    const linkUrl = notification.eventType === "Click" ? notification.click.link : undefined;
     const userAgent =
       notification.eventType === "Open"
         ? notification.open.userAgent

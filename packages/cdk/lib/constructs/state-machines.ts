@@ -1,7 +1,7 @@
 import * as cdk from "aws-cdk-lib";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import type * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import type {
   SequenceDefinition,
@@ -73,6 +73,7 @@ export class StateMachinesConstruct extends Construct {
       sendEmailFn,
       checkConditionFn,
       { counter: 0 },
+      def.id,
     );
 
     // Complete task
@@ -111,6 +112,7 @@ export class StateMachinesConstruct extends Construct {
     sendEmailFn: lambda.IFunction,
     checkConditionFn: lambda.IFunction,
     ctx: { counter: number },
+    sequenceId: string,
   ): sfn.Chain | null {
     let chain: sfn.Chain | null = null;
 
@@ -121,19 +123,31 @@ export class StateMachinesConstruct extends Construct {
 
       switch (step.type) {
         case "send":
-          state = this.buildSendStep(prefix, n, step, sendEmailFn);
+          state = this.buildSendStep(prefix, n, step, sendEmailFn, sequenceId);
           break;
         case "wait":
           state = this.buildWaitStep(prefix, n, step);
           break;
         case "condition":
           state = this.buildConditionStep(
-            prefix, n, step, sendEmailFn, checkConditionFn, ctx,
+            prefix,
+            n,
+            step,
+            sendEmailFn,
+            checkConditionFn,
+            ctx,
+            sequenceId,
           );
           break;
         case "choice":
           state = this.buildChoiceStep(
-            prefix, n, step, sendEmailFn, checkConditionFn, ctx,
+            prefix,
+            n,
+            step,
+            sendEmailFn,
+            checkConditionFn,
+            ctx,
+            sequenceId,
           );
           break;
       }
@@ -149,6 +163,7 @@ export class StateMachinesConstruct extends Construct {
     n: number,
     step: SendStep,
     sendEmailFn: lambda.IFunction,
+    sequenceId: string,
   ): tasks.LambdaInvoke {
     const task = new tasks.LambdaInvoke(this, `${prefix}-Send${n}`, {
       lambdaFunction: sendEmailFn,
@@ -156,6 +171,7 @@ export class StateMachinesConstruct extends Construct {
         action: "send",
         templateKey: step.templateKey,
         subject: step.subject,
+        sequenceId,
         "subscriber.$": "$.subscriber",
       }),
       resultPath: "$.sendResult",
@@ -165,15 +181,9 @@ export class StateMachinesConstruct extends Construct {
     return task;
   }
 
-  private buildWaitStep(
-    prefix: string,
-    n: number,
-    step: WaitStep,
-  ): sfn.Wait {
+  private buildWaitStep(prefix: string, n: number, step: WaitStep): sfn.Wait {
     const totalSeconds =
-      (step.days ?? 0) * 86400 +
-      (step.hours ?? 0) * 3600 +
-      (step.minutes ?? 0) * 60;
+      (step.days ?? 0) * 86400 + (step.hours ?? 0) * 3600 + (step.minutes ?? 0) * 60;
 
     return new sfn.Wait(this, `${prefix}-Wait${n}`, {
       time: sfn.WaitTime.duration(cdk.Duration.seconds(totalSeconds)),
@@ -188,30 +198,38 @@ export class StateMachinesConstruct extends Construct {
     sendEmailFn: lambda.IFunction,
     checkConditionFn: lambda.IFunction,
     ctx: { counter: number },
+    sequenceId: string,
   ): sfn.IChainable {
-    const checkTask = new tasks.LambdaInvoke(
-      this,
-      `${prefix}-Check${n}`,
-      {
-        lambdaFunction: checkConditionFn,
-        payload: sfn.TaskInput.fromObject({
-          check: step.check,
-          ...(step.field != null && { field: step.field }),
-          ...(step.value != null && { value: step.value }),
-          ...(step.templateKey != null && { templateKey: step.templateKey }),
-          "subscriber.$": "$.subscriber",
-        }),
-        resultPath: "$.conditionResult",
-        payloadResponseOnly: true,
-      },
-    );
+    const checkTask = new tasks.LambdaInvoke(this, `${prefix}-Check${n}`, {
+      lambdaFunction: checkConditionFn,
+      payload: sfn.TaskInput.fromObject({
+        check: step.check,
+        ...(step.field !== null && step.field !== undefined && { field: step.field }),
+        ...(step.value !== null && step.value !== undefined && { value: step.value }),
+        ...(step.templateKey !== null &&
+          step.templateKey !== undefined && { templateKey: step.templateKey }),
+        "subscriber.$": "$.subscriber",
+      }),
+      resultPath: "$.conditionResult",
+      payloadResponseOnly: true,
+    });
     checkTask.addRetry(this.retryConfig);
 
     const thenChain = this.buildChain(
-      prefix, step.then, sendEmailFn, checkConditionFn, ctx,
+      prefix,
+      step.then,
+      sendEmailFn,
+      checkConditionFn,
+      ctx,
+      sequenceId,
     );
     const elseChain = this.buildChain(
-      prefix, step.else ?? [], sendEmailFn, checkConditionFn, ctx,
+      prefix,
+      step.else ?? [],
+      sendEmailFn,
+      checkConditionFn,
+      ctx,
+      sequenceId,
     );
 
     const choice = new sfn.Choice(this, `${prefix}-Cond${n}`);
@@ -219,10 +237,7 @@ export class StateMachinesConstruct extends Construct {
     const elseState = elseChain ?? new sfn.Pass(this, `${prefix}-ElsePass${n}`);
 
     choice
-      .when(
-        sfn.Condition.booleanEquals("$.conditionResult.result", true),
-        thenState,
-      )
+      .when(sfn.Condition.booleanEquals("$.conditionResult.result", true), thenState)
       .otherwise(elseState);
 
     const converge = new sfn.Pass(this, `${prefix}-CondMerge${n}`);
@@ -242,26 +257,34 @@ export class StateMachinesConstruct extends Construct {
     sendEmailFn: lambda.IFunction,
     checkConditionFn: lambda.IFunction,
     ctx: { counter: number },
+    sequenceId: string,
   ): sfn.IChainable {
     const choice = new sfn.Choice(this, `${prefix}-Choice${n}`);
 
     // Build each branch and wire it to the Choice
     for (const branch of step.branches) {
       const branchChain = this.buildChain(
-        prefix, branch.steps, sendEmailFn, checkConditionFn, ctx,
+        prefix,
+        branch.steps,
+        sendEmailFn,
+        checkConditionFn,
+        ctx,
+        sequenceId,
       );
       if (branchChain) {
-        choice.when(
-          sfn.Condition.stringEquals(step.field, branch.value),
-          branchChain,
-        );
+        choice.when(sfn.Condition.stringEquals(step.field, branch.value), branchChain);
       }
     }
 
     // Default/otherwise branch
     if (step.default && step.default.length > 0) {
       const defaultChain = this.buildChain(
-        prefix, step.default, sendEmailFn, checkConditionFn, ctx,
+        prefix,
+        step.default,
+        sendEmailFn,
+        checkConditionFn,
+        ctx,
+        sequenceId,
       );
       if (defaultChain) {
         choice.otherwise(defaultChain);

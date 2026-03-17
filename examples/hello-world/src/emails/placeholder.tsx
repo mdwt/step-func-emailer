@@ -1,13 +1,4 @@
-import {
-  Html,
-  Head,
-  Body,
-  Container,
-  Text,
-  Link,
-  Hr,
-  Preview,
-} from "@react-email/components";
+import { Html, Head, Body, Container, Text, Link, Hr, Preview } from "@react-email/components";
 import * as React from "react";
 
 interface PlaceholderEmailProps {
@@ -27,8 +18,7 @@ export default function PlaceholderEmail({
         <Container style={container}>
           <Text style={paragraph}>Hey {firstName},</Text>
           <Text style={paragraph}>
-            This is a placeholder template. Replace it with your actual email
-            content.
+            This is a placeholder template. Replace it with your actual email content.
           </Text>
           <Hr style={hr} />
           <Text style={footer}>
@@ -44,8 +34,7 @@ export default function PlaceholderEmail({
 
 const main: React.CSSProperties = {
   backgroundColor: "#ffffff",
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 const container: React.CSSProperties = {

@@ -8,8 +8,8 @@
   "scripts": {
     "build": "tsc",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run",
-    "lint": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint bin lib",
     "cdk": "cdk",
     "synth": "cdk synth",
     "deploy": "cdk deploy"

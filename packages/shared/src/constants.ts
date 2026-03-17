@@ -4,15 +4,10 @@ export const SENT_SK_PREFIX = "SENT#" as const;
 export const SUPPRESSION_SK = "SUPPRESSION" as const;
 
 export const subscriberPK = (email: string): string => `SUB#${email}`;
-export const executionSK = (sequenceId: string): string =>
-  `${EXEC_SK_PREFIX}${sequenceId}`;
-export const sentSK = (isoTimestamp: string): string =>
-  `${SENT_SK_PREFIX}${isoTimestamp}`;
+export const executionSK = (sequenceId: string): string => `${EXEC_SK_PREFIX}${sequenceId}`;
+export const sentSK = (isoTimestamp: string): string => `${SENT_SK_PREFIX}${isoTimestamp}`;
 
 export const SEND_LOG_TTL_DAYS = 90;
-
-export const DEFAULT_RATE_LIMIT_COUNT = 2;
-export const DEFAULT_RATE_LIMIT_WINDOW_HOURS = 12;
 
 export const TEMPLATE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 

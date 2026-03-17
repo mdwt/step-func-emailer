@@ -1,9 +1,5 @@
 import { SFNClient, StopExecutionCommand } from "@aws-sdk/client-sfn";
-import type {
-  SendEmailInput,
-  RegisterOutput,
-  SendOutput,
-} from "@step-func-emailer/shared";
+import type { SendEmailInput, RegisterOutput, SendOutput } from "@step-func-emailer/shared";
 import { resolveConfig } from "../lib/ssm-config.js";
 import {
   getSubscriberProfile,
@@ -11,16 +7,12 @@ import {
   getExecution,
   putExecution,
   deleteExecution,
-  countRecentSends,
   writeSendLog,
 } from "../lib/dynamo-client.js";
 import { renderTemplate } from "../lib/template-renderer.js";
 import { sendEmail } from "../lib/ses-sender.js";
 import { generateToken } from "../lib/unsubscribe-token.js";
-import {
-  loadDisplayNames,
-  resolveDisplayNames,
-} from "../lib/display-names.js";
+import { loadDisplayNames, resolveDisplayNames } from "../lib/display-names.js";
 
 const sfn = new SFNClient({});
 
@@ -33,21 +25,22 @@ export const handler = async (
     case "register":
       return handleRegister(event, config);
     case "send":
-      return handleSend(event, config);
+      return handleSend(event, config, event.sequenceId ?? "unknown");
     case "fire_and_forget":
       // Upsert profile first, then send
       await upsertSubscriberProfile(config.tableName, event.subscriber);
       return handleSend(
-        { action: "send", templateKey: event.templateKey, subject: event.subject, subscriber: event.subscriber },
+        {
+          action: "send",
+          templateKey: event.templateKey,
+          subject: event.subject,
+          subscriber: event.subscriber,
+        },
         config,
         "fire_and_forget",
       );
     case "complete":
-      await deleteExecution(
-        config.tableName,
-        event.subscriber.email,
-        event.sequenceId,
-      );
+      await deleteExecution(config.tableName, event.subscriber.email, event.sequenceId);
       return { completed: true };
   }
 };
@@ -59,11 +52,7 @@ async function handleRegister(
   await upsertSubscriberProfile(config.tableName, event.subscriber);
 
   // Check for existing execution and stop it
-  const existing = await getExecution(
-    config.tableName,
-    event.subscriber.email,
-    event.sequenceId,
-  );
+  const existing = await getExecution(config.tableName, event.subscriber.email, event.sequenceId);
   if (existing) {
     try {
       await sfn.send(
@@ -75,11 +64,7 @@ async function handleRegister(
     } catch {
       // Execution may already be stopped
     }
-    await deleteExecution(
-      config.tableName,
-      event.subscriber.email,
-      event.sequenceId,
-    );
+    await deleteExecution(config.tableName, event.subscriber.email, event.sequenceId);
   }
 
   await putExecution(
@@ -97,10 +82,7 @@ async function handleSend(
   config: Awaited<ReturnType<typeof resolveConfig>>,
   sequenceId: string = "unknown",
 ): Promise<SendOutput> {
-  const profile = await getSubscriberProfile(
-    config.tableName,
-    event.subscriber.email,
-  );
+  const profile = await getSubscriberProfile(config.tableName, event.subscriber.email);
 
   // Pre-send checks
   if (profile?.unsubscribed) {
@@ -110,22 +92,10 @@ async function handleSend(
     return { sent: false, reason: "suppressed" };
   }
 
-  const recentCount = await countRecentSends(
-    config.tableName,
-    event.subscriber.email,
-    config.rateLimitWindowHours,
-  );
-  if (recentCount >= config.rateLimitCount) {
-    return { sent: false, reason: "rate_limited" };
-  }
-
   // Load display names and build context
   const displayNameMap = await loadDisplayNames(config.templateBucket);
   const attributes = profile?.attributes ?? event.subscriber.attributes ?? {};
-  const displayNames = resolveDisplayNames(
-    displayNameMap,
-    attributes as Record<string, unknown>,
-  );
+  const displayNames = resolveDisplayNames(displayNameMap, attributes as Record<string, unknown>);
 
   const unsubscribeUrl = `${config.unsubscribeBaseUrl}?token=${generateToken(event.subscriber.email, config.unsubscribeSecret)}`;
 
@@ -155,6 +125,9 @@ async function handleSend(
     htmlBody,
     configurationSetName: config.sesConfigSet,
     unsubscribeUrl,
+    replyToAddress: config.replyToEmail || undefined,
+    templateKey: event.templateKey,
+    sequenceId,
   });
 
   await writeSendLog(config.tableName, event.subscriber.email, {

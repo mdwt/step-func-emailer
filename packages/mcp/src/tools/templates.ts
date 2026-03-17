@@ -1,13 +1,6 @@
-import {
-  S3Client,
-  ListObjectsV2Command,
-  GetObjectCommand,
-} from "@aws-sdk/client-s3";
+import { S3Client, ListObjectsV2Command, GetObjectCommand } from "@aws-sdk/client-s3";
 import { Liquid } from "liquidjs";
-import {
-  DynamoDBClient,
-  GetItemCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, GetItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { subscriberPK, PROFILE_SK } from "@step-func-emailer/shared";
 import type { McpConfig } from "../config.js";
@@ -43,14 +36,9 @@ export async function listTemplates(config: McpConfig, prefix?: string) {
   }));
 }
 
-async function fetchTemplate(
-  config: McpConfig,
-  templateKey: string,
-): Promise<string> {
+async function fetchTemplate(config: McpConfig, templateKey: string): Promise<string> {
   const s3Client = getS3(config.region);
-  const key = templateKey.endsWith(".html")
-    ? templateKey
-    : `${templateKey}.html`;
+  const key = templateKey.endsWith(".html") ? templateKey : `${templateKey}.html`;
 
   const result = await s3Client.send(
     new GetObjectCommand({
@@ -62,11 +50,7 @@ async function fetchTemplate(
   return (await result.Body?.transformToString()) ?? "";
 }
 
-export async function previewTemplate(
-  config: McpConfig,
-  templateKey: string,
-  email: string,
-) {
+export async function previewTemplate(config: McpConfig, templateKey: string, email: string) {
   const db = getDynamo(config.region);
 
   // Get subscriber profile for template variables
@@ -95,10 +79,7 @@ export async function previewTemplate(
   return { html: rendered };
 }
 
-export async function validateTemplate(
-  config: McpConfig,
-  templateKey: string,
-) {
+export async function validateTemplate(config: McpConfig, templateKey: string) {
   const html = await fetchTemplate(config, templateKey);
 
   try {

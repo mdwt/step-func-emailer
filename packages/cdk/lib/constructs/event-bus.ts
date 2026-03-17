@@ -1,13 +1,12 @@
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
-import * as sfn from "aws-cdk-lib/aws-stepfunctions";
-import * as lambda from "aws-cdk-lib/aws-lambda";
+import type * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import type * as lambda from "aws-cdk-lib/aws-lambda";
 import { Construct } from "constructs";
 import type { SequenceDefinition } from "@step-func-emailer/shared";
 
 export interface EventBusProps {
   eventBusName: string;
-  eventSource: string;
   definitions: SequenceDefinition[];
   stateMachines: Map<string, sfn.StateMachine>;
   sendEmailFn: lambda.IFunction;
@@ -45,9 +44,7 @@ export class EventBusConstruct extends Construct {
         firstName: events.EventField.fromPath(mapping.firstName),
       };
       if (mapping.attributes) {
-        subscriberInput.attributes = events.EventField.fromPath(
-          mapping.attributes,
-        );
+        subscriberInput.attributes = events.EventField.fromPath(mapping.attributes);
       }
 
       const ruleSlug = def.trigger.detailType.replace(/[^a-zA-Z0-9]/g, "-");
@@ -79,9 +76,7 @@ export class EventBusConstruct extends Construct {
             firstName: events.EventField.fromPath(evtMapping.firstName),
           };
           if (evtMapping.attributes) {
-            evtSubscriber.attributes = events.EventField.fromPath(
-              evtMapping.attributes,
-            );
+            evtSubscriber.attributes = events.EventField.fromPath(evtMapping.attributes);
           }
 
           new events.Rule(this, `${prefix}Event${i + 1}Rule`, {

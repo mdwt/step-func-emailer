@@ -7,9 +7,7 @@ type DisplayNameMap = Record<string, Record<string, string>>;
 let cachedMap: { data: DisplayNameMap; fetchedAt: number } | null = null;
 const CACHE_TTL_MS = 10 * 60 * 1000;
 
-export async function loadDisplayNames(
-  bucket: string,
-): Promise<DisplayNameMap> {
+export async function loadDisplayNames(bucket: string): Promise<DisplayNameMap> {
   if (cachedMap && Date.now() - cachedMap.fetchedAt < CACHE_TTL_MS) {
     return cachedMap.data;
   }

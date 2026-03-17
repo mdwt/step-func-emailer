@@ -1,6 +1,6 @@
 # step-func-emailer
 
-Serverless email sequences on AWS. Step Functions for orchestration, SES for delivery, DynamoDB for state. 
+Serverless email sequences on AWS. Step Functions for orchestration, SES for delivery, DynamoDB for state.
 
 Build onboarding drips, event-triggered sequences, and transactional emails. Manage everything through Claude Code via the MCP server — no dashboard needed.
 
@@ -53,7 +53,7 @@ Full Liquid syntax at runtime — variables, conditionals, loops, filters:
 <p>Hey {{ firstName }},</p>
 
 {% if platform == "kajabi" %}
-  <p>Here's how to connect your Kajabi checkout...</p>
+<p>Here's how to connect your Kajabi checkout...</p>
 {% endif %}
 
 <p><a href="{{ unsubscribeUrl }}">Unsubscribe</a></p>
@@ -80,9 +80,11 @@ Every state machine starts with a `register` call and ends with a `complete` cal
 Your app publishes events to a custom EventBridge bus. Two types of rules:
 
 **Sequence rules** start a Step Functions execution:
+
 - `customer.created` → onboarding sequence
 
 **Fire-and-forget rules** invoke the Send Lambda directly for single emails:
+
 - `sale.first` → congratulations email (example in code, uncomment to enable)
 
 Add new events by defining EventBridge rules in CDK and creating the corresponding templates.
@@ -119,14 +121,14 @@ All config lives in `.env` at the repo root (see `.env.example`). At deploy time
 
 Key settings:
 
-| Variable | Description |
-|----------|-------------|
-| `TABLE_NAME` | Main DynamoDB table name |
-| `EVENTS_TABLE_NAME` | Engagement events table name |
-| `TEMPLATE_BUCKET_NAME` | S3 bucket for HTML templates |
-| `DEFAULT_FROM_EMAIL` | SES verified sender address |
-| `UNSUBSCRIBE_SECRET` | HMAC secret for unsubscribe tokens |
-| `SSM_PREFIX` | SSM parameter namespace |
+| Variable               | Description                        |
+| ---------------------- | ---------------------------------- |
+| `TABLE_NAME`           | Main DynamoDB table name           |
+| `EVENTS_TABLE_NAME`    | Engagement events table name       |
+| `TEMPLATE_BUCKET_NAME` | S3 bucket for HTML templates       |
+| `DEFAULT_FROM_EMAIL`   | SES verified sender address        |
+| `UNSUBSCRIBE_SECRET`   | HMAC secret for unsubscribe tokens |
+| `SSM_PREFIX`           | SSM parameter namespace            |
 
 ## Cost
 

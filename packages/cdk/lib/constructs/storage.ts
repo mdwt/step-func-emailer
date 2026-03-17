@@ -1,9 +1,9 @@
+import * as path from "node:path";
 import * as cdk from "aws-cdk-lib";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as s3 from "aws-cdk-lib/aws-s3";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import { Construct } from "constructs";
-import * as path from "node:path";
 
 export interface StorageProps {
   tableName: string;
@@ -56,11 +56,7 @@ export class StorageConstruct extends Construct {
 
     // Deploy rendered templates from root templates/ directory
     new s3deploy.BucketDeployment(this, "DeployTemplates", {
-      sources: [
-        s3deploy.Source.asset(
-          path.join(__dirname, "../../../../templates"),
-        ),
-      ],
+      sources: [s3deploy.Source.asset(path.join(__dirname, "../../../../templates"))],
       destinationBucket: this.templateBucket,
     });
   }

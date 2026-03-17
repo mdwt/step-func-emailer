@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import "source-map-support/register";
-import * as cdk from "aws-cdk-lib";
 import * as path from "node:path";
 import * as fs from "node:fs";
+import * as cdk from "aws-cdk-lib";
 import type { StepFuncEmailerConfig } from "@step-func-emailer/shared";
 import { StepFuncEmailerStack } from "../lib/step-func-emailer-stack.js";
 import { loadSequenceConfigs } from "../lib/load-sequences.js";
@@ -41,14 +41,12 @@ const config: StepFuncEmailerConfig = {
   eventsTableName: required("EVENTS_TABLE_NAME"),
   templateBucketName: required("TEMPLATE_BUCKET_NAME"),
   eventBusName: required("EVENT_BUS_NAME"),
-  eventSource: required("EVENT_SOURCE"),
   sesConfigSetName: required("SES_CONFIG_SET_NAME"),
   snsTopicName: required("SNS_TOPIC_NAME"),
   defaultFromEmail: required("DEFAULT_FROM_EMAIL"),
   defaultFromName: required("DEFAULT_FROM_NAME"),
+  replyToEmail: process.env.REPLY_TO_EMAIL || undefined,
   unsubscribeSecret: required("UNSUBSCRIBE_SECRET"),
-  rateLimitCount: Number(required("RATE_LIMIT_COUNT")),
-  rateLimitWindowHours: Number(required("RATE_LIMIT_WINDOW_HOURS")),
   ssmPrefix: required("SSM_PREFIX"),
 };
 

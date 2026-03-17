@@ -27,9 +27,7 @@ export async function listSuppressed(config: McpConfig, limit: number) {
     }),
   );
 
-  return (result.Items ?? [])
-    .map((i) => unmarshall(i))
-    .slice(0, limit);
+  return (result.Items ?? []).map((i) => unmarshall(i)).slice(0, limit);
 }
 
 export async function removeSuppression(config: McpConfig, email: string) {

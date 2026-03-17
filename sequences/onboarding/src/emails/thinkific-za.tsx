@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function ThinkificZa({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function ThinkificZa({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,13 +28,12 @@ export default function ThinkificZa({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Welcome to CheckoutJoy! You're on Thinkific in South Africa — let's
-            get you accepting Rand payments with PayFast.
+            Welcome to CheckoutJoy! You're on Thinkific in South Africa — let's get you accepting
+            Rand payments with PayFast.
           </Text>
 
           <Text style={paragraph}>
-            Watch this step-by-step tutorial to connect PayFast to your
-            Thinkific school:
+            Watch this step-by-step tutorial to connect PayFast to your Thinkific school:
           </Text>
 
           <Section>
@@ -38,29 +43,25 @@ export default function ThinkificZa({
           </Section>
 
           <Text style={paragraph}>
-            Once done, your students can pay in ZAR via EFT, credit card, and
-            SnapScan.
+            Once done, your students can pay in ZAR via EFT, credit card, and SnapScan.
           </Text>
 
           <Text style={paragraph}>
             Prefer to read? Here's the{" "}
-            <Link style={link} href="https://checkoutjoy.com/docs/integrations/thinkific/getting-started">
+            <Link
+              style={link}
+              href="https://checkoutjoy.com/docs/integrations/thinkific/getting-started"
+            >
               Thinkific getting started guide
             </Link>
             .
           </Text>
 
-          <Text style={paragraph}>
-            You've got 14 days to test everything for free.
-          </Text>
+          <Text style={paragraph}>You've got 14 days to test everything for free.</Text>
 
-          <Text style={paragraph}>
-            Just reply if you need help — I respond personally.
-          </Text>
+          <Text style={paragraph}>Just reply if you need help — I respond personally.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

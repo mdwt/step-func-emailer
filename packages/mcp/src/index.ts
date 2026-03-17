@@ -2,6 +2,7 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { version } from "../package.json";
 import { resolveConfig } from "./config.js";
 import {
   getSubscriber,
@@ -11,25 +12,10 @@ import {
   unsubscribeSubscriber,
   resubscribeSubscriber,
 } from "./tools/subscribers.js";
-import {
-  listSuppressed,
-  removeSuppression,
-} from "./tools/suppression.js";
-import {
-  getSubscriberEvents,
-  getTemplateEvents,
-  getSequenceEvents,
-} from "./tools/engagement.js";
-import {
-  listTemplates,
-  previewTemplate,
-  validateTemplate,
-} from "./tools/templates.js";
-import {
-  getFailedExecutions,
-  getDeliveryStats,
-} from "./tools/system.js";
-import { version } from "../package.json";
+import { listSuppressed, removeSuppression } from "./tools/suppression.js";
+import { getSubscriberEvents, getTemplateEvents, getSequenceEvents } from "./tools/engagement.js";
+import { listTemplates, previewTemplate, validateTemplate } from "./tools/templates.js";
+import { getFailedExecutions, getDeliveryStats } from "./tools/system.js";
 
 const config = resolveConfig();
 
@@ -47,9 +33,7 @@ server.registerTool(
     inputSchema: { email: z.string().email() },
   },
   async ({ email }) => ({
-    content: [
-      { type: "text", text: JSON.stringify(await getSubscriber(config, email), null, 2) },
-    ],
+    content: [{ type: "text", text: JSON.stringify(await getSubscriber(config, email), null, 2) }],
   }),
 );
 
@@ -58,10 +42,7 @@ server.registerTool(
   {
     description: "List subscriber profiles, optionally filtered by status",
     inputSchema: {
-      status: z
-        .enum(["active", "unsubscribed", "suppressed", "all"])
-        .optional()
-        .default("all"),
+      status: z.enum(["active", "unsubscribed", "suppressed", "all"]).optional().default("all"),
       limit: z.number().int().min(1).max(100).optional().default(20),
     },
   },
@@ -120,11 +101,7 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(
-          await unsubscribeSubscriber(config, email),
-          null,
-          2,
-        ),
+        text: JSON.stringify(await unsubscribeSubscriber(config, email), null, 2),
       },
     ],
   }),
@@ -140,11 +117,7 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(
-          await resubscribeSubscriber(config, email),
-          null,
-          2,
-        ),
+        text: JSON.stringify(await resubscribeSubscriber(config, email), null, 2),
       },
     ],
   }),
@@ -194,9 +167,7 @@ server.registerTool(
     description: "Get engagement events for one subscriber",
     inputSchema: {
       email: z.string().email(),
-      eventType: z
-        .enum(["delivery", "open", "click", "bounce", "complaint"])
-        .optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),
@@ -207,14 +178,7 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(
-          await getSubscriberEvents(
-            config,
-            email,
-            eventType,
-            startDate,
-            endDate,
-            limit,
-          ),
+          await getSubscriberEvents(config, email, eventType, startDate, endDate, limit),
           null,
           2,
         ),
@@ -229,9 +193,7 @@ server.registerTool(
     description: "Get engagement events across all subscribers for a template",
     inputSchema: {
       templateKey: z.string(),
-      eventType: z
-        .enum(["delivery", "open", "click", "bounce", "complaint"])
-        .optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),
@@ -242,14 +204,7 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(
-          await getTemplateEvents(
-            config,
-            templateKey,
-            eventType,
-            startDate,
-            endDate,
-            limit,
-          ),
+          await getTemplateEvents(config, templateKey, eventType, startDate, endDate, limit),
           null,
           2,
         ),
@@ -264,9 +219,7 @@ server.registerTool(
     description: "Get engagement events for all templates in a sequence",
     inputSchema: {
       sequenceId: z.string(),
-      eventType: z
-        .enum(["delivery", "open", "click", "bounce", "complaint"])
-        .optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),
@@ -277,14 +230,7 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(
-          await getSequenceEvents(
-            config,
-            sequenceId,
-            eventType,
-            startDate,
-            endDate,
-            limit,
-          ),
+          await getSequenceEvents(config, sequenceId, eventType, startDate, endDate, limit),
           null,
           2,
         ),
@@ -326,11 +272,7 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(
-          await previewTemplate(config, templateKey, email),
-          null,
-          2,
-        ),
+        text: JSON.stringify(await previewTemplate(config, templateKey, email), null, 2),
       },
     ],
   }),
@@ -346,11 +288,7 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(
-          await validateTemplate(config, templateKey),
-          null,
-          2,
-        ),
+        text: JSON.stringify(await validateTemplate(config, templateKey), null, 2),
       },
     ],
   }),
@@ -395,11 +333,7 @@ server.registerTool(
     content: [
       {
         type: "text",
-        text: JSON.stringify(
-          await getDeliveryStats(config, startDate, endDate),
-          null,
-          2,
-        ),
+        text: JSON.stringify(await getDeliveryStats(config, startDate, endDate), null, 2),
       },
     ],
   }),

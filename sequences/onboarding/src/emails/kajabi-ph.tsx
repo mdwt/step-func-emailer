@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function KajabiPh({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function KajabiPh({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,14 +28,13 @@ export default function KajabiPh({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Welcome to CheckoutJoy! You're selling on Kajabi from the
-            Philippines — let's get GCash, GrabPay, and other local payment
-            methods connected.
+            Welcome to CheckoutJoy! You're selling on Kajabi from the Philippines — let's get GCash,
+            GrabPay, and other local payment methods connected.
           </Text>
 
           <Text style={paragraph}>
-            Watch this tutorial — I show you how to connect Xendit to Kajabi so
-            your Filipino customers can pay the way they prefer:
+            Watch this tutorial — I show you how to connect Xendit to Kajabi so your Filipino
+            customers can pay the way they prefer:
           </Text>
 
           <Section>
@@ -39,8 +44,8 @@ export default function KajabiPh({
           </Section>
 
           <Text style={paragraph}>
-            Your students will be able to pay with GCash, GrabPay, bank
-            transfer, and cards — all through Xendit.
+            Your students will be able to pay with GCash, GrabPay, bank transfer, and cards — all
+            through Xendit.
           </Text>
 
           <Text style={paragraph}>
@@ -51,17 +56,11 @@ export default function KajabiPh({
             .
           </Text>
 
-          <Text style={paragraph}>
-            You've got 14 days to test everything for free.
-          </Text>
+          <Text style={paragraph}>You've got 14 days to test everything for free.</Text>
 
-          <Text style={paragraph}>
-            Just reply if you need help — I respond personally.
-          </Text>
+          <Text style={paragraph}>Just reply if you need help — I respond personally.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

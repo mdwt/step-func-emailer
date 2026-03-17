@@ -1,12 +1,5 @@
-import {
-  SFNClient,
-  ListExecutionsCommand,
-  ExecutionStatus,
-} from "@aws-sdk/client-sfn";
-import {
-  DynamoDBClient,
-  ScanCommand,
-} from "@aws-sdk/client-dynamodb";
+import { SFNClient, ListExecutionsCommand, ExecutionStatus } from "@aws-sdk/client-sfn";
+import { DynamoDBClient, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import { EVT_SK_PREFIX } from "@step-func-emailer/shared";
 import type { McpConfig } from "../config.js";
@@ -32,8 +25,7 @@ export async function getFailedExecutions(
 ) {
   if (!stateMachineArn) {
     return {
-      error:
-        "stateMachineArn is required. Pass the ARN of the state machine to check.",
+      error: "stateMachineArn is required. Pass the ARN of the state machine to check.",
     };
   }
 
@@ -61,11 +53,7 @@ export async function getFailedExecutions(
     }));
 }
 
-export async function getDeliveryStats(
-  config: McpConfig,
-  startDate: string,
-  endDate: string,
-) {
+export async function getDeliveryStats(config: McpConfig, startDate: string, endDate: string) {
   const db = getDynamo(config.region);
 
   const result = await db.send(

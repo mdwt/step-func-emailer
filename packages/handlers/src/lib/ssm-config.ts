@@ -10,9 +10,7 @@ export async function getParameter(name: string): Promise<string> {
     return cached.value;
   }
 
-  const result = await ssm.send(
-    new GetParameterCommand({ Name: name, WithDecryption: true }),
-  );
+  const result = await ssm.send(new GetParameterCommand({ Name: name, WithDecryption: true }));
 
   const value = result.Parameter?.Value;
   if (!value) {
@@ -29,11 +27,10 @@ export interface ResolvedConfig {
   templateBucket: string;
   defaultFromEmail: string;
   defaultFromName: string;
+  replyToEmail: string;
   sesConfigSet: string;
   unsubscribeBaseUrl: string;
   unsubscribeSecret: string;
-  rateLimitCount: number;
-  rateLimitWindowHours: number;
 }
 
 const SSM_PREFIX = process.env.SSM_PREFIX ?? "/step-func-emailer";
@@ -45,22 +42,20 @@ export async function resolveConfig(): Promise<ResolvedConfig> {
     templateBucket,
     defaultFromEmail,
     defaultFromName,
+    replyToEmail,
     sesConfigSet,
     unsubscribeBaseUrl,
     unsubscribeSecret,
-    rateLimitCount,
-    rateLimitWindowHours,
   ] = await Promise.all([
     getParameter(`${SSM_PREFIX}/table-name`),
     getParameter(`${SSM_PREFIX}/events-table-name`),
     getParameter(`${SSM_PREFIX}/template-bucket`),
     getParameter(`${SSM_PREFIX}/default-from-email`),
     getParameter(`${SSM_PREFIX}/default-from-name`),
+    getParameter(`${SSM_PREFIX}/reply-to-email`).catch(() => ""),
     getParameter(`${SSM_PREFIX}/ses-config-set`),
     getParameter(`${SSM_PREFIX}/unsubscribe-base-url`),
     getParameter(`${SSM_PREFIX}/unsubscribe-secret`),
-    getParameter(`${SSM_PREFIX}/rate-limit-count`),
-    getParameter(`${SSM_PREFIX}/rate-limit-window-hours`),
   ]);
 
   return {
@@ -69,10 +64,9 @@ export async function resolveConfig(): Promise<ResolvedConfig> {
     templateBucket,
     defaultFromEmail,
     defaultFromName,
+    replyToEmail,
     sesConfigSet,
     unsubscribeBaseUrl,
     unsubscribeSecret,
-    rateLimitCount: parseInt(rateLimitCount, 10),
-    rateLimitWindowHours: parseInt(rateLimitWindowHours, 10),
   };
 }

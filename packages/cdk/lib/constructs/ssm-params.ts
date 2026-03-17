@@ -8,11 +8,10 @@ export interface SsmConstructProps {
   templateBucketName: string;
   defaultFromEmail: string;
   defaultFromName: string;
+  replyToEmail?: string;
   sesConfigSetName: string;
   unsubscribeBaseUrl: string;
   unsubscribeSecret: string;
-  rateLimitCount: number;
-  rateLimitWindowHours: number;
 }
 
 export class SsmConstruct extends Construct {
@@ -25,11 +24,10 @@ export class SsmConstruct extends Construct {
       "template-bucket": props.templateBucketName,
       "default-from-email": props.defaultFromEmail,
       "default-from-name": props.defaultFromName,
+      ...(props.replyToEmail ? { "reply-to-email": props.replyToEmail } : {}),
       "ses-config-set": props.sesConfigSetName,
       "unsubscribe-base-url": props.unsubscribeBaseUrl,
       "unsubscribe-secret": props.unsubscribeSecret,
-      "rate-limit-count": String(props.rateLimitCount),
-      "rate-limit-window-hours": String(props.rateLimitWindowHours),
     };
 
     for (const [key, value] of Object.entries(params)) {

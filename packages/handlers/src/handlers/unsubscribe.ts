@@ -16,9 +16,9 @@ function htmlPage(title: string, body: string): string {
 </head><body>${body}</body></html>`;
 }
 
-export const handler = async (
-  event: { queryStringParameters?: Record<string, string | undefined> },
-): Promise<APIGatewayProxyResultV2> => {
+export const handler = async (event: {
+  queryStringParameters?: Record<string, string | undefined>;
+}): Promise<APIGatewayProxyResultV2> => {
   const token = event.queryStringParameters?.token;
   if (!token) {
     return {

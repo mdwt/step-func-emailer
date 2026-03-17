@@ -7,8 +7,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 pnpm -r build              # Build all packages (shared must build first)
 pnpm -r test               # Run all tests (vitest)
-pnpm -r typecheck           # Typecheck all packages
-pnpm -r lint               # Lint all packages
+pnpm -r typecheck           # Typecheck all packages (includes test files)
+pnpm lint                  # ESLint all packages (flat config from root)
+pnpm lint:fix              # ESLint with auto-fix
+pnpm format                # Prettier format all files
+pnpm format:check          # Prettier check (CI)
 
 # Single package
 pnpm --filter @step-func-emailer/handlers build

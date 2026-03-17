@@ -1,9 +1,6 @@
 import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
-import type {
-  StepFuncEmailerConfig,
-  SequenceDefinition,
-} from "@step-func-emailer/shared";
+import type { StepFuncEmailerConfig, SequenceDefinition } from "@step-func-emailer/shared";
 import { StorageConstruct } from "./constructs/storage.js";
 import { SsmConstruct } from "./constructs/ssm-params.js";
 import { LambdasConstruct } from "./constructs/lambdas.js";
@@ -46,9 +43,7 @@ export class StepFuncEmailerStack extends cdk.Stack {
 
     // Subscribe engagement handler to engagement events
     sesConfig.engagementTopic.addSubscription(
-      new cdk.aws_sns_subscriptions.LambdaSubscription(
-        lambdas.engagementHandlerFn,
-      ),
+      new cdk.aws_sns_subscriptions.LambdaSubscription(lambdas.engagementHandlerFn),
     );
 
     // ── SSM Parameters ───────────────────────────────────────────────────
@@ -59,11 +54,10 @@ export class StepFuncEmailerStack extends cdk.Stack {
       templateBucketName: storage.templateBucket.bucketName,
       defaultFromEmail: config.defaultFromEmail,
       defaultFromName: config.defaultFromName,
+      replyToEmail: config.replyToEmail,
       sesConfigSetName: config.sesConfigSetName,
       unsubscribeBaseUrl: lambdas.unsubscribeFnUrl,
       unsubscribeSecret: config.unsubscribeSecret,
-      rateLimitCount: config.rateLimitCount,
-      rateLimitWindowHours: config.rateLimitWindowHours,
     });
 
     // ── State machines ───────────────────────────────────────────────────
@@ -101,7 +95,6 @@ export class StepFuncEmailerStack extends cdk.Stack {
     // ── EventBridge ──────────────────────────────────────────────────────
     new EventBusConstruct(this, "EventBus", {
       eventBusName: config.eventBusName,
-      eventSource: config.eventSource,
       definitions,
       stateMachines: stateMachines.stateMachines,
       sendEmailFn: lambdas.sendEmailFn,

@@ -7,9 +7,9 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc --noEmit && tsc --noEmit -p tsconfig.test.json",
     "test": "vitest run",
-    "lint": "tsc --noEmit"
+    "lint": "eslint src"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.1009.0",

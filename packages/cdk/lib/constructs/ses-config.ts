@@ -1,5 +1,4 @@
 import * as ses from "aws-cdk-lib/aws-ses";
-import * as sesActions from "aws-cdk-lib/aws-ses-actions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import { Construct } from "constructs";
 
@@ -24,21 +23,14 @@ export class SesConfigConstruct extends Construct {
       topicName: `${props.snsTopicName}-engagement`,
     });
 
-    this.configurationSet = new ses.ConfigurationSet(
-      this,
-      "ConfigurationSet",
-      {
-        configurationSetName: props.configSetName,
-      },
-    );
+    this.configurationSet = new ses.ConfigurationSet(this, "ConfigurationSet", {
+      configurationSetName: props.configSetName,
+    });
 
     // Add SNS event destination for bounces and complaints
     this.configurationSet.addEventDestination("BounceAndComplaint", {
       destination: ses.EventDestination.snsTopic(this.snsTopic),
-      events: [
-        ses.EmailSendingEvent.BOUNCE,
-        ses.EmailSendingEvent.COMPLAINT,
-      ],
+      events: [ses.EmailSendingEvent.BOUNCE, ses.EmailSendingEvent.COMPLAINT],
     });
 
     // Add SNS event destination for engagement events

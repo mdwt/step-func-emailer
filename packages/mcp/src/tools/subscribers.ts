@@ -1,6 +1,5 @@
 import {
   DynamoDBClient,
-  GetItemCommand,
   QueryCommand,
   UpdateItemCommand,
   DeleteItemCommand,
@@ -15,7 +14,6 @@ import {
   EXEC_SK_PREFIX,
   SENT_SK_PREFIX,
   SUPPRESSION_SK,
-  EVT_SK_PREFIX,
 } from "@step-func-emailer/shared";
 import type { McpConfig } from "../config.js";
 
@@ -47,9 +45,7 @@ export async function getSubscriber(config: McpConfig, email: string) {
 
   const items = (result.Items ?? []).map((i) => unmarshall(i));
   const profile = items.find((i) => i.SK === PROFILE_SK) ?? null;
-  const executions = items.filter((i) =>
-    (i.SK as string).startsWith(EXEC_SK_PREFIX),
-  );
+  const executions = items.filter((i) => (i.SK as string).startsWith(EXEC_SK_PREFIX));
   const sendLog = items
     .filter((i) => (i.SK as string).startsWith(SENT_SK_PREFIX))
     .sort((a, b) => (b.SK as string).localeCompare(a.SK as string))
@@ -67,13 +63,12 @@ export async function listSubscribers(
   const db = getDynamo(config.region);
 
   let filterExpression: string | undefined;
-  let expressionValues: Record<string, unknown> = {
+  const expressionValues: Record<string, unknown> = {
     ":sk": PROFILE_SK,
   };
 
   if (status === "active") {
-    filterExpression =
-      "SK = :sk AND unsubscribed = :false AND suppressed = :false";
+    filterExpression = "SK = :sk AND unsubscribed = :false AND suppressed = :false";
     expressionValues[":false"] = false;
   } else if (status === "unsubscribed") {
     filterExpression = "SK = :sk AND unsubscribed = :true";
@@ -94,9 +89,7 @@ export async function listSubscribers(
     }),
   );
 
-  return (result.Items ?? [])
-    .map((i) => unmarshall(i))
-    .slice(0, limit);
+  return (result.Items ?? []).map((i) => unmarshall(i)).slice(0, limit);
 }
 
 export async function updateSubscriber(

@@ -1,14 +1,14 @@
 /**
- * Renders all onboarding email templates to static HTML in templates/onboarding/.
+ * Renders all onboarding email templates to static HTML in build/onboarding/templates/.
  * Uses Liquid syntax for template variables — React Email handles layout/styling,
  * Liquid handles runtime personalization.
  */
-import { render } from "@react-email/render";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { render } from "@react-email/render";
 
 const EMAILS_DIR = path.join(__dirname, "emails");
-const OUT_DIR = path.join(__dirname, "../../../templates/onboarding");
+const OUT_DIR = path.join(__dirname, "../../../build/onboarding/templates");
 
 function collectTemplates(dir: string, relDir = ""): string[] {
   const results: string[] = [];

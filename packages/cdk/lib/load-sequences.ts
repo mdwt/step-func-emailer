@@ -6,11 +6,8 @@ import type { SequenceDefinition } from "@step-func-emailer/shared";
  * Scans sequences/ * /sequence.config.ts and loads each definition.
  * Works because CDK is invoked via tsx which registers the TS loader.
  */
-export function loadSequenceConfigs(
-  sequencesDir?: string,
-): SequenceDefinition[] {
-  const dir =
-    sequencesDir ?? path.resolve(__dirname, "../../../sequences");
+export function loadSequenceConfigs(sequencesDir?: string): SequenceDefinition[] {
+  const dir = sequencesDir ?? path.resolve(__dirname, "../../../sequences");
 
   if (!fs.existsSync(dir)) {
     return [];
@@ -24,14 +21,11 @@ export function loadSequenceConfigs(
     const configPath = path.join(dir, entry.name, "sequence.config.ts");
     if (!fs.existsSync(configPath)) continue;
 
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const mod = require(configPath);
     const def: SequenceDefinition = mod.default ?? mod.sequence;
 
     if (!def) {
-      throw new Error(
-        `${configPath}: must export a default or named 'sequence' export`,
-      );
+      throw new Error(`${configPath}: must export a default or named 'sequence' export`);
     }
     if (!def.id) {
       throw new Error(`${configPath}: missing 'id'`);

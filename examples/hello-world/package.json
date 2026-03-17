@@ -10,8 +10,8 @@
     "render": "tsx src/render.ts",
     "typecheck": "tsc --noEmit",
     "dev": "email dev --dir src/emails --port 3001",
-    "test": "vitest run",
-    "lint": "tsc --noEmit"
+    "test": "vitest run --passWithNoTests",
+    "lint": "eslint src"
   },
   "dependencies": {
     "@react-email/components": "^1.0.9",

@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function Day9VatTax({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function Day9VatTax({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,8 +28,8 @@ export default function Day9VatTax({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            If you need to charge VAT or sales tax, CheckoutJoy handles it
-            automatically. No more manual calculations or spreadsheet headaches.
+            If you need to charge VAT or sales tax, CheckoutJoy handles it automatically. No more
+            manual calculations or spreadsheet headaches.
           </Text>
 
           <Section>
@@ -32,9 +38,7 @@ export default function Day9VatTax({
             </Button>
           </Section>
 
-          <Text style={paragraph}>
-            That's a 5-minute tutorial that covers the full setup.
-          </Text>
+          <Text style={paragraph}>That's a 5-minute tutorial that covers the full setup.</Text>
 
           <Text style={paragraph}>
             For a deeper dive into invoicing and VAT compliance, check out the{" "}
@@ -44,9 +48,7 @@ export default function Day9VatTax({
             .
           </Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

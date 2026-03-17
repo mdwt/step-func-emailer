@@ -50,11 +50,7 @@ export async function upsertSubscriberProfile(
   const attrs = subscriber.attributes ?? {};
 
   // Build SET expressions — never overwrite unsubscribed or suppressed
-  const expressionParts = [
-    "email = :email",
-    "firstName = :firstName",
-    "updatedAt = :updatedAt",
-  ];
+  const expressionParts = ["email = :email", "firstName = :firstName", "updatedAt = :updatedAt"];
   const expressionValues: Record<string, unknown> = {
     ":email": subscriber.email,
     ":firstName": subscriber.firstName,
@@ -182,30 +178,6 @@ export async function writeSendLog(
       }),
     }),
   );
-}
-
-export async function countRecentSends(
-  tableName: string,
-  email: string,
-  windowHours: number,
-): Promise<number> {
-  const now = new Date();
-  const windowStart = new Date(now.getTime() - windowHours * 3600 * 1000);
-
-  const result = await dynamo.send(
-    new QueryCommand({
-      TableName: tableName,
-      KeyConditionExpression:
-        "PK = :pk AND SK BETWEEN :start AND :end",
-      ExpressionAttributeValues: marshall({
-        ":pk": subscriberPK(email),
-        ":start": sentSK(windowStart.toISOString()),
-        ":end": sentSK(now.toISOString()),
-      }),
-      Select: "COUNT",
-    }),
-  );
-  return result.Count ?? 0;
 }
 
 export async function hasBeenSent(

@@ -2,13 +2,7 @@
   "app": "npx tsx bin/app.ts",
   "watch": {
     "include": ["**"],
-    "exclude": [
-      "node_modules",
-      "cdk.out",
-      "dist",
-      "**/*.d.ts",
-      "**/*.js"
-    ]
+    "exclude": ["node_modules", "cdk.out", "dist", "**/*.d.ts", "**/*.js"]
   },
   "context": {}
 }

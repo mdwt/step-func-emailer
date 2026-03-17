@@ -1,15 +1,9 @@
-import {
-  SFNClient,
-  StopExecutionCommand,
-} from "@aws-sdk/client-sfn";
+import { SFNClient, StopExecutionCommand } from "@aws-sdk/client-sfn";
 import { getAllExecutions, deleteExecution } from "./dynamo-client.js";
 
 const sfn = new SFNClient({});
 
-export async function stopAllExecutions(
-  tableName: string,
-  email: string,
-): Promise<void> {
+export async function stopAllExecutions(tableName: string, email: string): Promise<void> {
   const executions = await getAllExecutions(tableName, email);
   await Promise.all(
     executions.map(async (exec) => {

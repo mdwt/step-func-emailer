@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function KajabiGlobal({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function KajabiGlobal({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,13 +28,13 @@ export default function KajabiGlobal({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Welcome to CheckoutJoy! You're on Kajabi — great choice. Let me
-            show you how to level up your checkout pages.
+            Welcome to CheckoutJoy! You're on Kajabi — great choice. Let me show you how to level up
+            your checkout pages.
           </Text>
 
           <Text style={paragraph}>
-            Start with this quick video — 3 ways to improve your Kajabi
-            checkouts (multi-currency, countdown timers, and more):
+            Start with this quick video — 3 ways to improve your Kajabi checkouts (multi-currency,
+            countdown timers, and more):
           </Text>
 
           <Section>
@@ -60,17 +66,11 @@ export default function KajabiGlobal({
             </Link>
           </Text>
 
-          <Text style={paragraph}>
-            You've got 14 days to test everything for free.
-          </Text>
+          <Text style={paragraph}>You've got 14 days to test everything for free.</Text>
 
-          <Text style={paragraph}>
-            Just reply if you need help — I respond personally.
-          </Text>
+          <Text style={paragraph}>Just reply if you need help — I respond personally.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

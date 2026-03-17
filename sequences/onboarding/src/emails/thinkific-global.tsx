@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function ThinkificGlobal({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function ThinkificGlobal({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,19 +28,20 @@ export default function ThinkificGlobal({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Welcome to CheckoutJoy! You're on Thinkific — great choice. Let me
-            show you how to build custom checkout pages that convert.
+            Welcome to CheckoutJoy! You're on Thinkific — great choice. Let me show you how to build
+            custom checkout pages that convert.
           </Text>
 
           <Section>
-            <Button style={cta} href="https://checkoutjoy.com/docs/integrations/thinkific/getting-started">
+            <Button
+              style={cta}
+              href="https://checkoutjoy.com/docs/integrations/thinkific/getting-started"
+            >
               Read: Thinkific Getting Started Guide →
             </Button>
           </Section>
 
-          <Text style={paragraph}>
-            Need a specific payment gateway? Pick your region:
-          </Text>
+          <Text style={paragraph}>Need a specific payment gateway? Pick your region:</Text>
 
           <Text style={paragraph}>
             •{" "}
@@ -55,17 +62,11 @@ export default function ThinkificGlobal({
             </Link>
           </Text>
 
-          <Text style={paragraph}>
-            You've got 14 days to test everything for free.
-          </Text>
+          <Text style={paragraph}>You've got 14 days to test everything for free.</Text>
 
-          <Text style={paragraph}>
-            Just reply if you need help — I respond personally.
-          </Text>
+          <Text style={paragraph}>Just reply if you need help — I respond personally.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

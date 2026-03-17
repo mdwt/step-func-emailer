@@ -6,15 +6,9 @@ const s3 = new S3Client({});
 const liquid = new Liquid();
 
 // Module-level cache survives across warm invocations
-const templateCache = new Map<
-  string,
-  { html: string; fetchedAt: number }
->();
+const templateCache = new Map<string, { html: string; fetchedAt: number }>();
 
-async function fetchTemplate(
-  bucket: string,
-  templateKey: string,
-): Promise<string> {
+async function fetchTemplate(bucket: string, templateKey: string): Promise<string> {
   const cached = templateCache.get(templateKey);
   if (cached && Date.now() - cached.fetchedAt < TEMPLATE_CACHE_TTL_MS) {
     return cached.html;

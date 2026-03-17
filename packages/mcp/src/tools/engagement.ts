@@ -1,14 +1,6 @@
-import {
-  DynamoDBClient,
-  QueryCommand,
-  ScanCommand,
-} from "@aws-sdk/client-dynamodb";
+import { DynamoDBClient, QueryCommand, ScanCommand } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
-import {
-  subscriberPK,
-  EVT_SK_PREFIX,
-  TEMPLATE_INDEX,
-} from "@step-func-emailer/shared";
+import { subscriberPK, EVT_SK_PREFIX, TEMPLATE_INDEX } from "@step-func-emailer/shared";
 import type { McpConfig } from "../config.js";
 
 let dynamo: DynamoDBClient;
@@ -61,9 +53,7 @@ export async function getSubscriberEvents(
     new QueryCommand({
       TableName: config.eventsTableName,
       KeyConditionExpression: `PK = :pk AND ${skRange!.expression}`,
-      ...(filterParts.length > 0
-        ? { FilterExpression: filterParts.join(" AND ") }
-        : {}),
+      ...(filterParts.length > 0 ? { FilterExpression: filterParts.join(" AND ") } : {}),
       ExpressionAttributeValues: marshall({
         ":pk": pk,
         ...skRange!.values,
@@ -101,9 +91,7 @@ export async function getTemplateEvents(
       TableName: config.eventsTableName,
       IndexName: TEMPLATE_INDEX,
       KeyConditionExpression: `templateKey = :tk AND ${skRange!.expression}`,
-      ...(filterParts.length > 0
-        ? { FilterExpression: filterParts.join(" AND ") }
-        : {}),
+      ...(filterParts.length > 0 ? { FilterExpression: filterParts.join(" AND ") } : {}),
       ExpressionAttributeValues: marshall({
         ":tk": templateKey,
         ...skRange!.values,

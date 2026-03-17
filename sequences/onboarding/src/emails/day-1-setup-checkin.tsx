@@ -1,18 +1,24 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
-import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
+import { main, container, paragraph, cta, hr, footer, footerLink } from "./_styles.js";
 
 interface Props {
   firstName?: string;
   unsubscribeUrl?: string;
 }
 
-export default function Day1SetupCheckin({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function Day1SetupCheckin({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,18 +28,17 @@ export default function Day1SetupCheckin({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Quick check-in — did you manage to connect your payment gateway
-            yesterday?
+            Quick check-in — did you manage to connect your payment gateway yesterday?
           </Text>
 
           <Text style={paragraph}>
-            If you got stuck, just reply with where you're at and I'll help you
-            through it. Most people get set up in under 15 minutes.
+            If you got stuck, just reply with where you're at and I'll help you through it. Most
+            people get set up in under 15 minutes.
           </Text>
 
           <Text style={paragraph}>
-            If you haven't started yet, no worries — here's a general overview
-            of selling courses from South Africa without Stripe:
+            If you haven't started yet, no worries — here's a general overview of selling courses
+            from South Africa without Stripe:
           </Text>
 
           <Section>
@@ -42,13 +47,9 @@ export default function Day1SetupCheckin({
             </Button>
           </Section>
 
-          <Text style={paragraph}>
-            You've still got plenty of time on your trial.
-          </Text>
+          <Text style={paragraph}>You've still got plenty of time on your trial.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

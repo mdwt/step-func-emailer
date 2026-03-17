@@ -5,9 +5,9 @@
  *
  * The rendered HTML files are deployed to S3 via CDK BucketDeployment.
  */
-import { render } from "@react-email/render";
 import * as fs from "node:fs";
 import * as path from "node:path";
+import { render } from "@react-email/render";
 
 const EMAILS_DIR = path.join(__dirname, "emails");
 const OUT_DIR = path.join(__dirname, "../../../templates");

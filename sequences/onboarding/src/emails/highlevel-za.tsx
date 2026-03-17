@@ -1,5 +1,14 @@
 import {
-  Html, Head, Body, Container, Text, Link, Hr, Preview, Button, Section,
+  Html,
+  Head,
+  Body,
+  Container,
+  Text,
+  Link,
+  Hr,
+  Preview,
+  Button,
+  Section,
 } from "@react-email/components";
 import * as React from "react";
 import { main, container, paragraph, cta, link, hr, footer, footerLink } from "./_styles.js";
@@ -9,10 +18,7 @@ interface Props {
   unsubscribeUrl?: string;
 }
 
-export default function HighlevelZa({
-  firstName = "there",
-  unsubscribeUrl = "#",
-}: Props) {
+export default function HighlevelZa({ firstName = "there", unsubscribeUrl = "#" }: Props) {
   return (
     <Html>
       <Head />
@@ -22,8 +28,8 @@ export default function HighlevelZa({
           <Text style={paragraph}>Hi {firstName},</Text>
 
           <Text style={paragraph}>
-            Welcome to CheckoutJoy! You're on HighLevel in South Africa — let's
-            get PayFast connected so you can sell in Rands.
+            Welcome to CheckoutJoy! You're on HighLevel in South Africa — let's get PayFast
+            connected so you can sell in Rands.
           </Text>
 
           <Section>
@@ -33,8 +39,7 @@ export default function HighlevelZa({
           </Section>
 
           <Text style={paragraph}>
-            Your clients can pay via EFT, credit card, and SnapScan — all in
-            Rands.
+            Your clients can pay via EFT, credit card, and SnapScan — all in Rands.
           </Text>
 
           <Text style={paragraph}>
@@ -45,17 +50,11 @@ export default function HighlevelZa({
             .
           </Text>
 
-          <Text style={paragraph}>
-            You've got 14 days to test everything for free.
-          </Text>
+          <Text style={paragraph}>You've got 14 days to test everything for free.</Text>
 
-          <Text style={paragraph}>
-            Just reply if you need help — I respond personally.
-          </Text>
+          <Text style={paragraph}>Just reply if you need help — I respond personally.</Text>
 
-          <Text style={paragraph}>
-            Meiring{"\n"}Founder, CheckoutJoy
-          </Text>
+          <Text style={paragraph}>Meiring{"\n"}Founder, CheckoutJoy</Text>
 
           <Hr style={hr} />
 

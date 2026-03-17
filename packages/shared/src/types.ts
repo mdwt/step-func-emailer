@@ -64,6 +64,7 @@ export interface SendInput {
   action: "send";
   templateKey: string;
   subject: string;
+  sequenceId?: string;
   subscriber: Subscriber;
 }
 
@@ -81,11 +82,7 @@ export interface CompleteInput {
   executionArn: string;
 }
 
-export type SendEmailInput =
-  | RegisterInput
-  | SendInput
-  | FireAndForgetInput
-  | CompleteInput;
+export type SendEmailInput = RegisterInput | SendInput | FireAndForgetInput | CompleteInput;
 
 // ── SendEmailFn outputs ─────────────────────────────────────────────────────
 
@@ -100,7 +97,7 @@ export interface SendSuccessOutput {
 
 export interface SendSkippedOutput {
   sent: false;
-  reason: "unsubscribed" | "suppressed" | "rate_limited";
+  reason: "unsubscribed" | "suppressed";
 }
 
 export type SendOutput = SendSuccessOutput | SendSkippedOutput;
@@ -137,18 +134,11 @@ export interface SsmParameterPaths {
   sesConfigSet: string;
   unsubscribeBaseUrl: string;
   unsubscribeSecret: string;
-  rateLimitCount: string;
-  rateLimitWindowHours: string;
 }
 
 // ── Email event (engagement tracking) ────────────────────────────────────────
 
-export type EmailEventType =
-  | "delivery"
-  | "open"
-  | "click"
-  | "bounce"
-  | "complaint";
+export type EmailEventType = "delivery" | "open" | "click" | "bounce" | "complaint";
 
 export interface EmailEvent {
   PK: string; // SUB#<email>
@@ -243,13 +233,11 @@ export interface StepFuncEmailerConfig {
   eventsTableName: string;
   templateBucketName: string;
   eventBusName: string;
-  eventSource: string;
   sesConfigSetName: string;
   snsTopicName: string;
   defaultFromEmail: string;
   defaultFromName: string;
+  replyToEmail?: string;
   unsubscribeSecret: string;
-  rateLimitCount: number;
-  rateLimitWindowHours: number;
   ssmPrefix: string;
 }

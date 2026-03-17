@@ -2,8 +2,7 @@ import type * as React from "react";
 
 export const main: React.CSSProperties = {
   backgroundColor: "#ffffff",
-  fontFamily:
-    '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+  fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
 };
 
 export const container: React.CSSProperties = {
