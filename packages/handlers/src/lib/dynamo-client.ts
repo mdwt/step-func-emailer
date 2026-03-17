@@ -78,7 +78,14 @@ export async function upsertSubscriberProfile(
 ): Promise<void> {
   const now = new Date().toISOString();
   const pk = subscriberPK(subscriber.email);
-  const attrs = subscriber.attributes ?? {};
+  const rawAttrs = subscriber.attributes ?? {};
+  // Filter out system keys to avoid duplicate paths in the UpdateExpression
+  const attrs: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(rawAttrs)) {
+    if (!SYSTEM_KEYS.has(key)) {
+      attrs[key] = value;
+    }
+  }
 
   logger.info("Upserting subscriber profile", {
     email: subscriber.email,

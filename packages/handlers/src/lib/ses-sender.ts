@@ -86,7 +86,7 @@ export async function sendEmail(params: SendEmailParams): Promise<string> {
       },
       ConfigurationSetName: params.configurationSetName,
       EmailTags: [
-        { Name: "templateKey", Value: params.templateKey },
+        { Name: "templateKey", Value: params.templateKey.replace(/\//g, "--") },
         { Name: "sequenceId", Value: params.sequenceId },
       ],
     }),
