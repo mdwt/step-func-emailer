@@ -73,13 +73,6 @@ function addSteps(lines: Line[], steps: SequenceStep[], prev: string): string {
       for (const branch of step.branches) {
         if (branch.steps.length > 0) {
           const end = addSteps(lines, branch.steps, ch);
-          // Label on first edge
-          const _firstNode = lines.find(
-            (l) =>
-              l.text.includes(`${ch} --> `) &&
-              l.text.includes(branch.steps[0].type === "send" ? "📧" : ""),
-          );
-          // Add labeled edge from choice to first node of branch
           const branchFirst = findFirstChild(lines, ch, end, branch.steps);
           if (branchFirst) {
             replacePlainEdge(lines, ch, branchFirst, branch.value);

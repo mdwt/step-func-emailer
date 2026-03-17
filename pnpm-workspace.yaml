@@ -2,6 +2,7 @@ packages:
   - packages/*
   - examples/*
   - sequences/*
+  - tools
 
 onlyBuiltDependencies:
   - esbuild

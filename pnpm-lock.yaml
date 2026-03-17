@@ -186,6 +186,16 @@ importers:
         specifier: ^4.21.0
         version: 4.21.0
 
+  tools:
+    dependencies:
+      '@step-func-emailer/shared':
+        specifier: workspace:*
+        version: link:../packages/shared
+    devDependencies:
+      tsx:
+        specifier: ^4.21.0
+        version: 4.21.0
+
 packages:
 
   '@aws-cdk/asset-awscli-v1@2.2.263':

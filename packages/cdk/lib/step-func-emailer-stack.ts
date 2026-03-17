@@ -88,10 +88,34 @@ export class StepFuncEmailerStack extends cdk.Stack {
       }),
     );
 
-    // Grant read on each state machine
-    for (const sm of stateMachines.stateMachines.values()) {
-      sm.grantRead(lambdas.sendEmailFn);
-    }
+    // Grant read on state machines — construct ARNs manually to avoid circular
+    // dependency between StateMachine → Lambda → StateMachine via EventBridge
+    const smArns = definitions.map((d) => {
+      const name =
+        d.id
+          .split(/[-_]/)
+          .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+          .join("") + "Sequence";
+      return this.formatArn({
+        service: "states",
+        resource: "stateMachine",
+        resourceName: name,
+        arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+      });
+    });
+    const smExecArns = smArns.map((arn) => arn.replace(":stateMachine:", ":execution:") + ":*");
+    lambdas.sendEmailFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ["states:DescribeStateMachine", "states:ListExecutions"],
+        resources: smArns,
+      }),
+    );
+    lambdas.sendEmailFn.addToRolePolicy(
+      new cdk.aws_iam.PolicyStatement({
+        actions: ["states:DescribeExecution", "states:GetExecutionHistory"],
+        resources: smExecArns,
+      }),
+    );
 
     // ── EventBridge ──────────────────────────────────────────────────────
     new EventBusConstruct(this, "EventBus", {
