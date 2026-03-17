@@ -133,6 +133,64 @@ Key settings:
 | `UNSUBSCRIBE_SECRET`   | HMAC secret for unsubscribe tokens      |
 | `SSM_PREFIX`           | SSM parameter namespace                 |
 
+## Permissions
+
+The local AWS profile (`AWS_PROFILE` in `.env`) needs permissions for CDK deployment, the MCP server, and manual test events. Lambda execution roles are created automatically by CDK with least-privilege grants — no manual setup needed.
+
+Minimum IAM policy for the local profile:
+
+```json
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DynamoDB",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:<region>:<account>:table/<table-name>",
+        "arn:aws:dynamodb:<region>:<account>:table/<table-name>/index/*",
+        "arn:aws:dynamodb:<region>:<account>:table/<events-table-name>",
+        "arn:aws:dynamodb:<region>:<account>:table/<events-table-name>/index/*"
+      ]
+    },
+    {
+      "Sid": "S3Templates",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::<template-bucket-name>", "arn:aws:s3:::<template-bucket-name>/*"]
+    },
+    {
+      "Sid": "StepFunctions",
+      "Effect": "Allow",
+      "Action": ["states:StopExecution", "states:ListExecutions"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EventBridge",
+      "Effect": "Allow",
+      "Action": "events:PutEvents",
+      "Resource": "arn:aws:events:<region>:<account>:event-bus/<event-bus-name>"
+    },
+    {
+      "Sid": "CDKBootstrap",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::<account>:role/cdk-hnb659fds-*-<account>-<region>"
+    }
+  ]
+}
+```
+
+Replace `<account>`, `<region>`, `<table-name>`, `<events-table-name>`, `<template-bucket-name>`, and `<event-bus-name>` with your values from `.env`.
+
 ## Cost
 
 Under $5/month at 1,000 subscribers. Step Functions charges per state transition ($0.000025 each). Wait states are free. Lambda, DynamoDB, SES, and S3 costs are negligible at this scale.

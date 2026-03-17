@@ -1,6 +1,6 @@
 {
   "name": "@step-func-emailer/cdk",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "private": true,
   "type": "commonjs",
   "main": "dist/lib/step-func-emailer-stack.js",

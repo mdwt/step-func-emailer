@@ -13,6 +13,11 @@ pnpm lint:fix              # ESLint with auto-fix
 pnpm format                # Prettier format all files
 pnpm format:check          # Prettier check (CI)
 
+# Versioning
+pnpm changeset             # Create a new changeset (interactive)
+pnpm version-packages      # Apply changesets → bump versions + update CHANGELOGs
+pnpm release               # Version + build (run before deploy)
+
 # Single package
 pnpm --filter @step-func-emailer/handlers build
 pnpm --filter @step-func-emailer/handlers test
@@ -82,3 +87,5 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 - Subscriber attributes are top-level DynamoDB columns, not nested under an `attributes` map. The `Subscriber` type (event input) still has `attributes?: Record<string, unknown>` — these are flattened to top-level columns on write, with system keys filtered out
 - `AWS_PROFILE` is set in `.env` and must be passed to CDK commands and the MCP server. The MCP server reads `.env` automatically for table/bucket names
 - SES EmailTags don't allow `/` in values — `templateKey` is stored with `/` replaced by `--` in tags only. Headers and DynamoDB use the original key with `/`
+- Commits must follow [Conventional Commits](https://www.conventionalcommits.org/) format (enforced by commitlint). Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- Use Changesets for version management: run `pnpm changeset` to describe changes, then `pnpm version-packages` to bump versions and generate changelogs. Core packages (shared, handlers, cdk, mcp) are linked — they version together

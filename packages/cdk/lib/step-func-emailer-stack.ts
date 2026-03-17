@@ -40,6 +40,7 @@ export class StepFuncEmailerStack extends cdk.Stack {
       templateBucket: storage.templateBucket,
       ssmPrefix: config.ssmPrefix,
       snsTopic: sesConfig.snsTopic,
+      sesConfigSetName: config.sesConfigSetName,
     });
 
     // Subscribe engagement handler to engagement events
@@ -68,7 +69,10 @@ export class StepFuncEmailerStack extends cdk.Stack {
       sequences: definitions,
     });
 
-    // Grant permissions to stop executions (wildcard — covers all sequences)
+    // Grant permissions to stop executions.
+    // states:StopExecution targets execution ARNs which contain random IDs —
+    // scoping to arn:aws:states:*:*:execution:* is functionally equivalent to *,
+    // so we keep * for clarity.
     lambdas.sendEmailFn.addToRolePolicy(
       new cdk.aws_iam.PolicyStatement({
         actions: ["states:StopExecution"],

@@ -15,6 +15,7 @@ export interface LambdasProps {
   templateBucket: s3.Bucket;
   ssmPrefix: string;
   snsTopic: sns.Topic;
+  sesConfigSetName: string;
   logLevel?: string;
 }
 
@@ -66,10 +67,14 @@ export class LambdasConstruct extends Construct {
 
     props.table.grantReadWriteData(this.sendEmailFn);
     props.templateBucket.grantRead(this.sendEmailFn);
+    const stack = cdk.Stack.of(this);
     this.sendEmailFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["ses:SendEmail"],
-        resources: ["*"],
+        resources: [
+          `arn:aws:ses:${stack.region}:${stack.account}:identity/*`,
+          `arn:aws:ses:${stack.region}:${stack.account}:configuration-set/${props.sesConfigSetName}`,
+        ],
       }),
     );
     this.grantSsmRead(this.sendEmailFn, props.ssmPrefix);
@@ -100,6 +105,7 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadWriteData(this.unsubscribeFn);
+    // ses:PutSuppressedDestination does not support resource-level permissions — * is required
     this.unsubscribeFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["ses:PutSuppressedDestination"],
@@ -125,6 +131,7 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadWriteData(this.bounceHandlerFn);
+    // ses:PutSuppressedDestination does not support resource-level permissions — * is required
     this.bounceHandlerFn.addToRolePolicy(
       new iam.PolicyStatement({
         actions: ["ses:PutSuppressedDestination"],
