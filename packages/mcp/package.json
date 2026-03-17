@@ -1,6 +1,6 @@
 {
   "name": "@step-func-emailer/mcp",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "MCP server for step-func-emailer — subscriber management, engagement analytics, and system health",
   "license": "MIT",
   "type": "commonjs",

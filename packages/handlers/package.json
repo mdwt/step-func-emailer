@@ -1,6 +1,6 @@
 {
   "name": "@step-func-emailer/handlers",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Lambda handlers for step-func-emailer",
   "license": "MIT",
   "type": "commonjs",

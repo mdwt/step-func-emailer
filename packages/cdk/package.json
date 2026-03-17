@@ -1,6 +1,6 @@
 {
   "name": "@step-func-emailer/cdk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "AWS CDK constructs for step-func-emailer",
   "license": "MIT",
   "type": "commonjs",
