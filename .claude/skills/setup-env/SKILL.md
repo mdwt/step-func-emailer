@@ -14,7 +14,16 @@ You are configuring the project's `.env` file by discovering real AWS resources.
 
 ### Step 1: Choose AWS profile
 
-Run `aws configure list-profiles` to get available profiles. Present them as options using `AskUserQuestion` (pick the most likely 3-4 profiles, or ask the user to type theirs if many exist).
+Run `aws configure list-profiles` to get available profiles. Use `AskUserQuestion` to ask:
+
+**"Use an existing AWS profile or create a new one with least-privilege permissions?"**
+
+Options:
+
+1. **Use existing profile** — present the available profiles (pick the most likely 3-4, or ask the user to type theirs if many exist)
+2. **Create new profile** — create a new IAM user with the minimum permissions needed for this project (MCP server, CDK deploy, test events)
+
+#### Option 1: Use existing profile
 
 Once chosen, run:
 
@@ -24,6 +33,108 @@ aws configure get region --profile <profile>
 ```
 
 Extract the **account ID** and **region**. If the STS call fails (expired creds, MFA needed), tell the user and stop.
+
+#### Option 2: Create new profile with least-privilege permissions
+
+Ask the user for an **admin profile** — an existing profile with IAM permissions to create users and policies. This will only be used during setup.
+
+```bash
+aws sts get-caller-identity --profile <admin-profile> --output json
+aws configure get region --profile <admin-profile>
+```
+
+Extract the **account ID** and **region**. If the STS call fails, tell the user and stop.
+
+Ask the user for a **name** for the new profile. Default to `step-func-emailer`.
+
+**Important:** Do NOT create the IAM user yet. Continue through steps 2-5 first to collect all resource names (table, bucket, event bus, etc.). The IAM policy needs these names to scope permissions. Return to this step after step 5 to create the user.
+
+After step 5, create the IAM user and policy with the resource names collected:
+
+```bash
+# Create the IAM policy with least-privilege permissions
+aws iam create-policy \
+  --profile <admin-profile> \
+  --policy-name <new-profile-name>-policy \
+  --policy-document '{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "DynamoDB",
+      "Effect": "Allow",
+      "Action": [
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem",
+        "dynamodb:Query",
+        "dynamodb:Scan"
+      ],
+      "Resource": [
+        "arn:aws:dynamodb:<region>:<account>:table/<table-name>",
+        "arn:aws:dynamodb:<region>:<account>:table/<table-name>/index/*",
+        "arn:aws:dynamodb:<region>:<account>:table/<events-table-name>",
+        "arn:aws:dynamodb:<region>:<account>:table/<events-table-name>/index/*"
+      ]
+    },
+    {
+      "Sid": "S3Templates",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject", "s3:ListBucket"],
+      "Resource": ["arn:aws:s3:::<template-bucket-name>", "arn:aws:s3:::<template-bucket-name>/*"]
+    },
+    {
+      "Sid": "StepFunctions",
+      "Effect": "Allow",
+      "Action": ["states:StopExecution", "states:ListExecutions"],
+      "Resource": "*"
+    },
+    {
+      "Sid": "EventBridge",
+      "Effect": "Allow",
+      "Action": "events:PutEvents",
+      "Resource": "arn:aws:events:<region>:<account>:event-bus/<event-bus-name>"
+    },
+    {
+      "Sid": "CDKBootstrap",
+      "Effect": "Allow",
+      "Action": "sts:AssumeRole",
+      "Resource": "arn:aws:iam::<account>:role/cdk-hnb659fds-*-<account>-<region>"
+    }
+  ]
+}' --output json
+```
+
+Extract the policy ARN from the response. Then create the IAM user and attach the policy:
+
+```bash
+# Create IAM user
+aws iam create-user --profile <admin-profile> --user-name <new-profile-name> --output json
+
+# Attach the policy
+aws iam attach-user-policy --profile <admin-profile> \
+  --user-name <new-profile-name> \
+  --policy-arn <policy-arn>
+
+# Create access keys
+aws iam create-access-key --profile <admin-profile> --user-name <new-profile-name> --output json
+```
+
+Extract the `AccessKeyId` and `SecretAccessKey` from the response. Configure the new AWS profile:
+
+```bash
+aws configure set aws_access_key_id <access-key-id> --profile <new-profile-name>
+aws configure set aws_secret_access_key <secret-access-key> --profile <new-profile-name>
+aws configure set region <region> --profile <new-profile-name>
+```
+
+Verify the new profile works:
+
+```bash
+aws sts get-caller-identity --profile <new-profile-name> --output json
+```
+
+Use `<new-profile-name>` as the profile for the rest of the setup. Tell the user the access key secret was only shown once and is now configured in their AWS CLI profile.
 
 ### Step 2: Discover SES identities
 
@@ -132,6 +243,7 @@ Environment configured:
 - From: <fromName> <fromEmail>
 - Stack: <stackName>
 - SES Config Set: <sesConfigSetName> (existing/new)
+- IAM user: <new-profile-name> (least-privilege) — if created
 - MCP server: registered (restart Claude Code to activate)
 
 Run /deploy when you're ready to deploy.
