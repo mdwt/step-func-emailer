@@ -100,6 +100,12 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadWriteData(this.unsubscribeFn);
+    this.unsubscribeFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ses:PutSuppressedDestination"],
+        resources: ["*"],
+      }),
+    );
     this.grantSsmRead(this.unsubscribeFn, props.ssmPrefix);
 
     const fnUrl = this.unsubscribeFn.addFunctionUrl({
@@ -119,6 +125,12 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadWriteData(this.bounceHandlerFn);
+    this.bounceHandlerFn.addToRolePolicy(
+      new iam.PolicyStatement({
+        actions: ["ses:PutSuppressedDestination"],
+        resources: ["*"],
+      }),
+    );
     this.grantSsmRead(this.bounceHandlerFn, props.ssmPrefix);
 
     // Subscribe to SES notifications

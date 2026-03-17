@@ -25,6 +25,7 @@ export class SesConfigConstruct extends Construct {
 
     this.configurationSet = new ses.ConfigurationSet(this, "ConfigurationSet", {
       configurationSetName: props.configSetName,
+      suppressionReasons: ses.SuppressionReasons.BOUNCES_AND_COMPLAINTS,
     });
 
     // Add SNS event destination for bounces and complaints

@@ -16,8 +16,8 @@ pnpm format:check          # Prettier check (CI)
 # Single package
 pnpm --filter @step-func-emailer/handlers build
 pnpm --filter @step-func-emailer/handlers test
-pnpm --filter @step-func-emailer/cdk synth    # Synthesize CloudFormation
-pnpm --filter @step-func-emailer/cdk deploy   # Deploy to AWS
+cd packages/cdk && AWS_PROFILE=<profile> npx cdk synth    # Synthesize CloudFormation
+cd packages/cdk && AWS_PROFILE=<profile> npx cdk deploy --require-approval never  # Deploy to AWS
 
 # Templates
 pnpm --filter @step-func-emailer/templates dev     # React Email dev server on :3001
@@ -33,7 +33,7 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 - **`shared`** — Types and constants consumed by handlers and CDK. Must build first. Exports key helpers like `subscriberPK()`, `executionSK()`, `sentSK()` for DynamoDB key construction.
 - **`handlers`** — Five Lambda functions + shared lib modules. All handlers read config from SSM Parameter Store at runtime (cached 5min via `lib/ssm-config.ts`).
 - **`cdk`** — AWS CDK infrastructure. Config is loaded from a root `.env` file (see `.env.example`). All environment variables are stored as SSM parameters (not Lambda env vars directly). Entry point: `bin/app.ts`.
-- **`mcp`** — MCP server (`@step-func-emailer/mcp`) for interacting with the email system from Claude Code. Provides tools for subscriber management, engagement analytics, template preview, and system health. Spawned over stdio, uses local AWS credentials.
+- **`mcp`** — MCP server (`@step-func-emailer/mcp`) for interacting with the email system from Claude Code. Provides tools for subscriber management, engagement analytics, template preview, and system health. Spawned over stdio, uses local AWS credentials. Setup: `claude mcp add step-func-emailer -e AWS_PROFILE=<profile> -- npx --prefix packages/mcp tsx packages/mcp/src/index.ts` (reads config from root `.env`).
 - **`templates`** — React Email components in `src/emails/`. Build step renders them to static HTML with Liquid placeholders (`{{ firstName }}`, `{{ unsubscribeUrl }}`), output to `build/<sequenceId>/templates/`, deployed to S3 via CDK BucketDeployment.
 
 ### Data flow
@@ -48,7 +48,7 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 
 ### DynamoDB tables
 
-**Main table** (single-table design): All items keyed by `PK = SUB#<email>`. Sort keys: `PROFILE`, `EXEC#<sequenceId>`, `SENT#<timestamp>`, `SUPPRESSION`. No GSIs.
+**Main table** (single-table design): All items keyed by `PK = SUB#<email>`. Sort keys: `PROFILE`, `EXEC#<sequenceId>`, `SENT#<timestamp>`, `SUPPRESSION`. No GSIs. Subscriber attributes (platform, country, gateway, etc.) are stored as **top-level columns** on the PROFILE item — not nested under an `attributes` map. System columns (`PK`, `SK`, `email`, `firstName`, `unsubscribed`, `suppressed`, `createdAt`, `updatedAt`) are fixed; everything else is a dynamic attribute. Use `extractAttributes(profile)` from `dynamo-client.ts` to separate custom attributes from system columns.
 
 **Events table** (engagement tracking): `PK = SUB#<email>`, `SK = EVT#<timestamp>#<eventType>`. GSI `TemplateIndex` on `templateKey` + `SK` for cross-subscriber template queries. TTL-enabled (365 days).
 
@@ -64,9 +64,9 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 ### Handler lib modules
 
 - **ssm-config** — Resolves all config from SSM with caching
-- **dynamo-client** — All DynamoDB operations (profile CRUD, execution tracking, send log, suppression)
+- **dynamo-client** — All DynamoDB operations (profile CRUD, execution tracking, send log, suppression). Exports `extractAttributes(profile)` to separate custom attributes from system columns
 - **template-renderer** — S3 fetch + LiquidJS render with 10min cache
-- **ses-sender** — SES v2 SendEmail with List-Unsubscribe headers
+- **ses-sender** — SES v2 SendEmail with List-Unsubscribe headers. `templateKey` and `sequenceId` are sent as custom headers (`X-Template-Key`, `X-Sequence-Id`) for engagement tracking, and as SES EmailTags (with `/` replaced by `--` in tag values since SES doesn't allow `/` in tags)
 - **unsubscribe-token** — HMAC-SHA256 token generation/validation (90-day expiry)
 - **display-names** — Optional value→display name mappings loaded from S3
 - **execution-stopper** — Stops all Step Functions executions for a subscriber
@@ -79,3 +79,6 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 - CDK uses `NodejsFunction` — handlers are bundled with esbuild at deploy time, AWS SDK is externalized
 - Pre-send check failures (unsubscribed, suppressed, rate-limited) return `{ sent: false }` — they don't throw. Sequences continue, emails are skipped.
 - The `unsubscribed` and `suppressed` flags on subscriber profiles are never overwritten by upsert — only their respective handlers can set them to `true`
+- Subscriber attributes are top-level DynamoDB columns, not nested under an `attributes` map. The `Subscriber` type (event input) still has `attributes?: Record<string, unknown>` — these are flattened to top-level columns on write, with system keys filtered out
+- `AWS_PROFILE` is set in `.env` and must be passed to CDK commands and the MCP server. The MCP server reads `.env` automatically for table/bucket names
+- SES EmailTags don't allow `/` in values — `templateKey` is stored with `/` replaced by `--` in tags only. Headers and DynamoDB use the original key with `/`

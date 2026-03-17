@@ -88,6 +88,7 @@ Check if `.env` already exists. If it does, show a diff of what will change and 
 Write the `.env` file with all values:
 
 ```
+AWS_PROFILE=<profile>
 ACCOUNT=<accountId>
 REGION=<region>
 STACK_NAME=<stackName>
@@ -104,7 +105,17 @@ UNSUBSCRIBE_SECRET=<secret>
 SSM_PREFIX=<ssmPrefix>
 ```
 
-### Step 8: Verify
+### Step 8: Set up MCP server
+
+Register the MCP server for Claude Code so the subscriber management and engagement tools are available:
+
+```bash
+claude mcp add step-func-emailer -e AWS_PROFILE=<profile> -- npx --prefix packages/mcp tsx packages/mcp/src/index.ts
+```
+
+Tell the user they'll need to restart Claude Code for the MCP tools to become available.
+
+### Step 9: Verify
 
 Run a quick sanity check:
 
@@ -121,6 +132,7 @@ Environment configured:
 - From: <fromName> <fromEmail>
 - Stack: <stackName>
 - SES Config Set: <sesConfigSetName> (existing/new)
+- MCP server: registered (restart Claude Code to activate)
 
 Run /deploy when you're ready to deploy.
 ```

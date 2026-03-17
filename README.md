@@ -94,16 +94,18 @@ Add new events by defining EventBridge rules in CDK and creating the correspondi
 Manage subscribers, preview templates, check engagement, and monitor system health through Claude Code. No UI needed.
 
 ```bash
-claude mcp add step-func-emailer -- npx @step-func-emailer/mcp
+claude mcp add step-func-emailer -e AWS_PROFILE=<your-profile> -- npx --prefix packages/mcp tsx packages/mcp/src/index.ts
 ```
 
-Uses your local AWS credentials. Tools include:
+The MCP server reads `TABLE_NAME`, `EVENTS_TABLE_NAME`, `TEMPLATE_BUCKET_NAME`, and `REGION` from the root `.env` file automatically. `AWS_PROFILE` is passed as an environment variable so it uses the correct AWS credentials.
 
-- **Subscribers** — look up, update, unsubscribe, resubscribe, delete
-- **Engagement** — query opens, clicks, deliveries by subscriber or template
-- **Templates** — list, preview with subscriber data, validate Liquid syntax
-- **Suppression** — view and manage bounced/complained addresses
-- **Health** — failed executions, delivery stats
+After adding, restart Claude Code. The tools will be available immediately:
+
+- **Subscribers** — `get_subscriber`, `list_subscribers`, `update_subscriber`, `delete_subscriber`, `unsubscribe_subscriber`, `resubscribe_subscriber`
+- **Engagement** — `get_subscriber_events`, `get_template_events`, `get_sequence_events` (query opens, clicks, deliveries, bounces, complaints)
+- **Templates** — `list_templates`, `preview_template` (render with live subscriber data), `validate_template` (check Liquid syntax)
+- **Suppression** — `list_suppressed`, `remove_suppression`
+- **Health** — `get_failed_executions`, `get_delivery_stats`
 
 ## Architecture
 
@@ -121,14 +123,15 @@ All config lives in `.env` at the repo root (see `.env.example`). At deploy time
 
 Key settings:
 
-| Variable               | Description                        |
-| ---------------------- | ---------------------------------- |
-| `TABLE_NAME`           | Main DynamoDB table name           |
-| `EVENTS_TABLE_NAME`    | Engagement events table name       |
-| `TEMPLATE_BUCKET_NAME` | S3 bucket for HTML templates       |
-| `DEFAULT_FROM_EMAIL`   | SES verified sender address        |
-| `UNSUBSCRIBE_SECRET`   | HMAC secret for unsubscribe tokens |
-| `SSM_PREFIX`           | SSM parameter namespace            |
+| Variable               | Description                             |
+| ---------------------- | --------------------------------------- |
+| `AWS_PROFILE`          | AWS CLI profile for deployments and MCP |
+| `TABLE_NAME`           | Main DynamoDB table name                |
+| `EVENTS_TABLE_NAME`    | Engagement events table name            |
+| `TEMPLATE_BUCKET_NAME` | S3 bucket for HTML templates            |
+| `DEFAULT_FROM_EMAIL`   | SES verified sender address             |
+| `UNSUBSCRIBE_SECRET`   | HMAC secret for unsubscribe tokens      |
+| `SSM_PREFIX`           | SSM parameter namespace                 |
 
 ## Cost
 

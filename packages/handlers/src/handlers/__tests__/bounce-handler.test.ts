@@ -5,6 +5,7 @@ const mockResolveConfig = vi.fn();
 const mockWriteSuppression = vi.fn();
 const mockSetProfileFlag = vi.fn();
 const mockStopAllExecutions = vi.fn();
+const mockAddToSuppressionList = vi.fn();
 
 vi.mock("../../lib/ssm-config.js", () => ({
   resolveConfig: () => mockResolveConfig(),
@@ -17,6 +18,10 @@ vi.mock("../../lib/dynamo-client.js", () => ({
 
 vi.mock("../../lib/execution-stopper.js", () => ({
   stopAllExecutions: (...args: unknown[]) => mockStopAllExecutions(...args),
+}));
+
+vi.mock("../../lib/ses-suppression.js", () => ({
+  addToSuppressionList: (...args: unknown[]) => mockAddToSuppressionList(...args),
 }));
 
 const { handler } = await import("../bounce-handler.js");
@@ -38,6 +43,7 @@ beforeEach(() => {
   mockWriteSuppression.mockReset().mockResolvedValue(undefined);
   mockSetProfileFlag.mockReset().mockResolvedValue(undefined);
   mockStopAllExecutions.mockReset().mockResolvedValue(undefined);
+  mockAddToSuppressionList.mockReset().mockResolvedValue(undefined);
 });
 
 describe("bounce-handler", () => {
@@ -66,6 +72,7 @@ describe("bounce-handler", () => {
       "suppressed",
     );
     expect(mockStopAllExecutions).toHaveBeenCalledWith("TestTable", "bounced@example.com");
+    expect(mockAddToSuppressionList).toHaveBeenCalledWith("bounced@example.com", "BOUNCE");
   });
 
   it("ignores transient bounces", async () => {
@@ -83,6 +90,7 @@ describe("bounce-handler", () => {
     expect(mockWriteSuppression).not.toHaveBeenCalled();
     expect(mockSetProfileFlag).not.toHaveBeenCalled();
     expect(mockStopAllExecutions).not.toHaveBeenCalled();
+    expect(mockAddToSuppressionList).not.toHaveBeenCalled();
   });
 
   it("suppresses subscriber on complaint", async () => {
@@ -109,6 +117,7 @@ describe("bounce-handler", () => {
       "suppressed",
     );
     expect(mockStopAllExecutions).toHaveBeenCalledWith("TestTable", "complainer@example.com");
+    expect(mockAddToSuppressionList).toHaveBeenCalledWith("complainer@example.com", "COMPLAINT");
   });
 
   it("handles multiple recipients in a bounce", async () => {

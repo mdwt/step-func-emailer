@@ -2,6 +2,7 @@ import type { SNSEvent } from "aws-lambda";
 import { resolveConfig } from "../lib/ssm-config.js";
 import { writeSuppression, setProfileFlag } from "../lib/dynamo-client.js";
 import { stopAllExecutions } from "../lib/execution-stopper.js";
+import { addToSuppressionList } from "../lib/ses-suppression.js";
 import { createLogger } from "../lib/logger.js";
 
 const logger = createLogger("bounce-handler");
@@ -59,6 +60,7 @@ export const handler = async (event: SNSEvent): Promise<void> => {
         );
         await setProfileFlag(config.tableName, email, "suppressed");
         await stopAllExecutions(config.tableName, email);
+        await addToSuppressionList(email, "BOUNCE");
       }
     }
 
@@ -80,6 +82,7 @@ export const handler = async (event: SNSEvent): Promise<void> => {
         );
         await setProfileFlag(config.tableName, email, "suppressed");
         await stopAllExecutions(config.tableName, email);
+        await addToSuppressionList(email, "COMPLAINT");
       }
     }
   }
