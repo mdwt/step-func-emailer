@@ -1,5 +1,11 @@
 # create-step-func-emailer
 
+## 0.2.1
+
+### Patch Changes
+
+- Fix template dependency versions to match published packages
+
 ## 0.2.0
 
 ### Minor Changes
