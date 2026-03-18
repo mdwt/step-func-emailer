@@ -77,7 +77,7 @@ description: System overview, AWS services, data flow, caching, and cost model.
 
 The main workhorse. Handles four actions:
 
-- **register** — Upsert subscriber profile, track execution in DynamoDB
+- **register** — Upsert subscriber profile, guard against unsubscribed/suppressed subscribers, track execution in DynamoDB
 - **send** — Pre-send checks → fetch template → render with Liquid → send via SES → log
 - **fire_and_forget** — Upsert + send in one call (for event-triggered single emails)
 - **complete** — Remove execution record when sequence finishes
@@ -92,11 +92,11 @@ Runtime condition evaluation for Step Functions. Queries DynamoDB to check:
 
 ### UnsubscribeFn (128MB, 10s, Function URL)
 
-Public endpoint (no auth). Validates HMAC-SHA256 token, marks subscriber as unsubscribed, stops all active executions, returns HTML confirmation page.
+Public endpoint (no auth). Validates HMAC-SHA256 token, marks subscriber as unsubscribed, stops all active executions, adds to SES account-level suppression list, returns HTML confirmation page.
 
 ### BounceHandlerFn (128MB, 10s)
 
-SNS trigger. Processes permanent bounces and complaints. Marks subscriber as suppressed, stops all executions. Ignores transient bounces.
+SNS trigger. Processes permanent bounces and complaints. Marks subscriber as suppressed, stops all executions, adds to SES account-level suppression list. Ignores transient bounces.
 
 ### EngagementHandlerFn (128MB, 10s)
 

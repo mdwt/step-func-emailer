@@ -150,7 +150,7 @@ CDK scans `sequences/*/sequence.config.ts` at deploy time. You never need to man
 ## Execution lifecycle
 
 1. **Event arrives** → EventBridge matches `detailType` → starts Step Functions execution
-2. **Register** → SendEmailFn upserts subscriber profile, records active execution
+2. **Register** → SendEmailFn upserts subscriber profile, checks `unsubscribed`/`suppressed` flags, records active execution. If the subscriber is unsubscribed or suppressed, registration throws and the execution fails immediately.
 3. **Steps execute** → Send/wait/choice/condition steps run in order
 4. **Complete** → SendEmailFn deletes the execution record
 5. **Timeout** → If the execution exceeds `timeoutMinutes`, Step Functions stops it
