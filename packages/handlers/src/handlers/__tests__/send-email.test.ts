@@ -112,6 +112,7 @@ describe("send-email handler", () => {
     };
 
     it("upserts profile and stores execution", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce({ unsubscribed: false, suppressed: false });
       mockGetExecution.mockResolvedValueOnce(null);
 
       const result = await handler(registerEvent);
@@ -129,7 +130,26 @@ describe("send-email handler", () => {
       );
     });
 
+    it("throws when subscriber is unsubscribed", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce({ unsubscribed: true, suppressed: false });
+
+      await expect(handler(registerEvent)).rejects.toThrow(
+        "Cannot register sequence for unsubscribed subscriber",
+      );
+      expect(mockPutExecution).not.toHaveBeenCalled();
+    });
+
+    it("throws when subscriber is suppressed", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce({ unsubscribed: false, suppressed: true });
+
+      await expect(handler(registerEvent)).rejects.toThrow(
+        "Cannot register sequence for suppressed subscriber",
+      );
+      expect(mockPutExecution).not.toHaveBeenCalled();
+    });
+
     it("stops existing execution before registering new one", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce({ unsubscribed: false, suppressed: false });
       mockGetExecution.mockResolvedValueOnce({
         executionArn: "arn:aws:states:us-east-1:123:execution:old",
         sequenceId: "onboarding",
@@ -149,6 +169,7 @@ describe("send-email handler", () => {
     });
 
     it("handles already-stopped execution gracefully", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce({ unsubscribed: false, suppressed: false });
       mockGetExecution.mockResolvedValueOnce({
         executionArn: "arn:old",
         sequenceId: "onboarding",

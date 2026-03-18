@@ -68,6 +68,27 @@ async function handleRegister(
 
   await upsertSubscriberProfile(config.tableName, event.subscriber);
 
+  // Guard: don't start a sequence for unsubscribed or suppressed subscribers
+  const profile = await getSubscriberProfile(config.tableName, event.subscriber.email);
+  if (profile?.unsubscribed) {
+    logger.info("Skipping registration — subscriber unsubscribed", {
+      email: event.subscriber.email,
+      sequenceId: event.sequenceId,
+    });
+    throw new Error(
+      `Cannot register sequence for unsubscribed subscriber: ${event.subscriber.email}`,
+    );
+  }
+  if (profile?.suppressed) {
+    logger.info("Skipping registration — subscriber suppressed", {
+      email: event.subscriber.email,
+      sequenceId: event.sequenceId,
+    });
+    throw new Error(
+      `Cannot register sequence for suppressed subscriber: ${event.subscriber.email}`,
+    );
+  }
+
   // Check for existing execution and stop it
   const existing = await getExecution(config.tableName, event.subscriber.email, event.sequenceId);
   if (existing) {
