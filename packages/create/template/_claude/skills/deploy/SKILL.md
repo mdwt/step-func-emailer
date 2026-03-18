@@ -36,11 +36,11 @@ If any are missing, report which templateKeys are missing and which sequence the
 
 ### Phase 4: CDK synth
 
-Read `AWS_PROFILE` from the root `.env` file and pass it as an environment variable:
-
 ```bash
-AWS_PROFILE=<profile-from-env> npx cdk synth
+pnpm synth
 ```
+
+This loads `.env` automatically (including `AWS_PROFILE`) via `dotenv-cli`. Never run `npx cdk synth` directly.
 
 Review the synth output for any errors or warnings. If synth fails, report the error and stop.
 
@@ -63,13 +63,13 @@ Only proceed after the user confirms.
 
 ### Phase 6: Deploy
 
-Read `AWS_PROFILE` from the root `.env` file and pass it as an environment variable to the deploy command:
-
 ```bash
-AWS_PROFILE=<profile-from-env> npx cdk deploy --require-approval never
+pnpm deploy
 ```
 
-This single command handles everything:
+This loads `.env` automatically (including `AWS_PROFILE`) via `dotenv-cli`. Never run `npx cdk deploy` directly.
+
+This command handles everything:
 
 - Updates DynamoDB tables if needed
 - Deploys Lambda functions

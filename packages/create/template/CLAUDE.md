@@ -7,9 +7,8 @@ A [mailshot](https://github.com/mdwt/mailshot) project — serverless email sequ
 ```bash
 pnpm build                    # Build all sequences (compiles TS + renders templates to build/)
 pnpm typecheck                # Typecheck all packages
-npx cdk synth                 # Synthesize CloudFormation (reads .env for AWS_PROFILE)
-npx cdk deploy                # Deploy to AWS
-npx cdk deploy --require-approval never  # Deploy without confirmation
+pnpm synth                    # Synthesize CloudFormation (loads .env automatically)
+pnpm deploy                   # Deploy to AWS (loads .env automatically)
 ```
 
 Single sequence:
@@ -63,4 +62,4 @@ See `@mailshot/shared` for the full `SequenceDefinition` type.
 - TypeScript strict mode, target ES2022, Node 22 runtime
 - Sequence packages use `@mailshot/<sequenceId>` naming and `workspace:*` for shared deps
 - The CDK stack reads all config from `.env` — no hardcoded values in `bin/app.ts`
-- `AWS_PROFILE` from `.env` must be set for `cdk synth` and `cdk deploy`
+- `pnpm synth` and `pnpm deploy` load `.env` automatically via `dotenv-cli` — never run `npx cdk` directly
