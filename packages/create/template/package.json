@@ -10,12 +10,18 @@
   "devDependencies": {
     "@mailshot/cdk": "^0.2.0",
     "@mailshot/shared": "^0.2.0",
+    "@types/node": "^22.0.0",
     "aws-cdk": "^2.1111.0",
     "aws-cdk-lib": "^2.243.0",
     "constructs": "^10.5.1",
+    "esbuild": "^0.27.0",
     "source-map-support": "^0.5.21",
-    "@types/node": "^22.0.0",
     "tsx": "^4.21.0",
     "typescript": "^5.9.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
   }
 }

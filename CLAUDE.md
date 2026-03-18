@@ -122,7 +122,6 @@ Add rate limit headers to SES sender responses
 - List every package that was changed (by its `name` from `package.json`)
 - Bump type per package: `patch` (bug fixes), `minor` (new features, non-breaking), `major` (breaking changes)
 - Linked packages (shared, handlers, cdk, mcp, create-mailshot) will all get the highest bump among them
-- Example packages (`@mailshot/hello-world`) are versioned independently
 - The `@mailshot/tools` package is ignored by changesets
 
 **Rules for the summary (below the `---`):**

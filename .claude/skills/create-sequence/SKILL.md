@@ -35,9 +35,9 @@ If any of these are missing or ambiguous, ask the user to clarify before generat
 
 ### Step 2: Create the sequence folder
 
-Create `sequences/<sequenceId>/` with:
+Create `sequences/<sequenceId>/` with the following files. Pay attention to exact file paths.
 
-**`package.json`:**
+**`sequences/<sequenceId>/package.json`:**
 
 ```json
 {
@@ -63,6 +63,7 @@ Create `sequences/<sequenceId>/` with:
   "devDependencies": {
     "@react-email/render": "^2.0.4",
     "@mailshot/shared": "workspace:*|^0.1.0",
+    "@types/node": "^22.0.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "react-email": "^5.2.9",
@@ -71,7 +72,7 @@ Create `sequences/<sequenceId>/` with:
 }
 ```
 
-**`tsconfig.json`:**
+**`sequences/<sequenceId>/tsconfig.json`:**
 
 ```json
 {
@@ -86,6 +87,8 @@ Create `sequences/<sequenceId>/` with:
 ```
 
 ### Step 3: Create `sequence.config.ts`
+
+**CRITICAL:** This file MUST be at `sequences/<sequenceId>/sequence.config.ts` — NOT inside `src/`. CDK auto-discovers sequences by looking for `sequences/*/sequence.config.ts` at the sequence root. If it's inside `src/`, CDK won't find it and no state machine will be created.
 
 The config must satisfy the `SequenceDefinition` type from `@mailshot/shared`. Here is the full shape:
 
@@ -147,7 +150,7 @@ export default {
 }
 ```
 
-Choices can be nested (e.g., branch on platform, then on country within each platform). All branches converge automatically — steps after a choice run for all branches. See `sequences/onboarding/sequence.config.ts` for a real example with 3 levels of nesting.
+Choices can be nested (e.g., branch on platform, then on country within each platform). All branches converge automatically — steps after a choice run for all branches.
 
 **Condition** — Lambda-based check that queries DynamoDB. Use this only when the data isn't in the execution input (e.g., checking send history or subscriber profile fields that changed after the sequence started):
 
@@ -173,7 +176,7 @@ Available checks:
 
 For each email, create a file at `sequences/<sequenceId>/src/emails/<templateName>.tsx`.
 
-Follow the pattern from existing templates in `examples/hello-world/src/emails/`:
+If using React Email:
 
 - Import from `@react-email/components`
 - Use Liquid placeholders: `firstName` and `unsubscribeUrl` as props with defaults
@@ -182,11 +185,13 @@ Follow the pattern from existing templates in `examples/hello-world/src/emails/`
 
 ### Step 5: Create render script
 
-Create `sequences/<sequenceId>/src/render.ts` — copy from `examples/hello-world/src/render.ts` and update the `OUT_DIR` to use the new sequence ID:
+Create `sequences/<sequenceId>/src/render.ts`. The `OUT_DIR` MUST use `__dirname` to resolve relative to the file, not `process.cwd()` (which changes depending on how the script is invoked):
 
 ```typescript
-const OUT_DIR = path.resolve(process.cwd(), "build/<sequenceId>/templates");
+const OUT_DIR = path.join(__dirname, "../../../build/<sequenceId>/templates");
 ```
+
+This resolves to `build/<sequenceId>/templates/` at the project root regardless of working directory.
 
 ### Step 6: Install and verify
 

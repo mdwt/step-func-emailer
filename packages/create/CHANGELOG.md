@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 0.2.8
+
+### Patch Changes
+
+- Fix scaffolded project build issues: add esbuild for CDK Lambda bundling, add pnpm.onlyBuiltDependencies, fix create-sequence skill to place sequence.config.ts at sequence root (not src/), fix render script to use \_\_dirname instead of process.cwd(), add @types/node to sequence template
+
 ## 0.2.7
 
 ### Patch Changes

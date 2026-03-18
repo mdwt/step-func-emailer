@@ -72,14 +72,13 @@ List every package you changed. Use `patch` for bug fixes, `minor` for new featu
 
 ## Project structure
 
-| Package                | What it is                                                       |
-| ---------------------- | ---------------------------------------------------------------- |
-| `packages/shared`      | Types and constants — must build first, everything depends on it |
-| `packages/handlers`    | Lambda functions and shared lib modules                          |
-| `packages/cdk`         | AWS CDK infrastructure                                           |
-| `packages/mcp`         | MCP server for Claude Code integration                           |
-| `packages/create`      | `npx create-mailshot` CLI scaffolder                             |
-| `examples/hello-world` | Example sequence and templates                                   |
+| Package             | What it is                                                       |
+| ------------------- | ---------------------------------------------------------------- |
+| `packages/shared`   | Types and constants — must build first, everything depends on it |
+| `packages/handlers` | Lambda functions and shared lib modules                          |
+| `packages/cdk`      | AWS CDK infrastructure                                           |
+| `packages/mcp`      | MCP server for Claude Code integration                           |
+| `packages/create`   | `npx create-mailshot` CLI scaffolder                             |
 
 ## Reporting issues
 

@@ -183,8 +183,6 @@ packages/
   cdk/          AWS CDK infrastructure
   mcp/          MCP server for Claude Code
   create/       CLI scaffolder (npx create-mailshot)
-examples/
-  hello-world/  Starter templates and example sequence
 ```
 
 ## Requirements

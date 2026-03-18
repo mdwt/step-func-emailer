@@ -28,7 +28,7 @@ Each sequence lives in `sequences/<name>/` and is auto-discovered by CDK. A sequ
 - **`src/emails/`** — email templates (HTML with Liquid variables for personalization)
 - **`src/render.ts`** — renders templates to static HTML for deployment
 
-Ask Claude Code to create one, or see `examples/hello-world` in the [mailshot repo](https://github.com/mdwt/mailshot) for the full pattern.
+Ask Claude Code to create one — just describe your sequence and it generates everything.
 
 ## Templates
 
