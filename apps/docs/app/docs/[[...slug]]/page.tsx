@@ -26,6 +26,8 @@ export async function generateStaticParams() {
   return source.generateParams();
 }
 
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://mailshot.dev";
+
 export async function generateMetadata(props: {
   params: Promise<{ slug?: string[] }>;
 }): Promise<Metadata> {
@@ -33,8 +35,17 @@ export async function generateMetadata(props: {
   const page = source.getPage(params.slug);
   if (!page) notFound();
 
+  const url = `${baseUrl}${page.url}`;
+
   return {
     title: page.data.title,
     description: page.data.description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      url,
+      type: "article",
+    },
   };
 }
