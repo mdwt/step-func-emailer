@@ -1,6 +1,7 @@
 <div align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&customColorList=18181b,e65100,ff9900&height=250&section=header&text=mailshot&fontSize=60&fontAlign=50&fontAlignY=40&desc=Serverless%20Email%20Sequences%20on%20AWS&descSize=22&descAlign=50&descAlignY=65" alt="mailshot banner" />
+  <img width="1376" height="768" alt="mailshot-banner" src="https://github.com/user-attachments/assets/20ea65a4-c2e7-44ee-9c1d-eb9cbd1e0dd8" />
 </div>
+
 
 <div align="center">
   <img src="https://img.shields.io/badge/AWS-Step%20Functions-FF9900?logo=amazonaws&logoColor=white&style=for-the-badge" alt="AWS Step Functions" />
