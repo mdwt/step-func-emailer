@@ -33,7 +33,8 @@ export const metadata: Metadata = {
   creator: "mailshot",
   publisher: "mailshot",
   icons: {
-    icon: "/icon.svg",
+    icon: "/favicon.ico",
+    apple: "/apple-touch-icon.png",
   },
   openGraph: {
     type: "website",
@@ -43,12 +44,19 @@ export const metadata: Metadata = {
     title: "mailshot — Serverless email sequences on AWS",
     description:
       "Open-source email sequencing framework for AWS. Define sequences in TypeScript, render templates with React Email, manage everything through Claude Code.",
+    images: [
+      {
+        url: "/og-image.png",
+        alt: "mailshot — Serverless email sequences on AWS",
+      },
+    ],
   },
   twitter: {
-    card: "summary",
+    card: "summary_large_image",
     title: "mailshot — Serverless email sequences on AWS",
     description:
       "Open-source email sequencing framework for AWS. Define sequences in TypeScript, render templates with React Email, manage everything through Claude Code.",
+    images: ["/og-image.png"],
   },
   alternates: {
     canonical: baseUrl,

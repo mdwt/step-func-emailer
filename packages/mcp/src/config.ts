@@ -6,6 +6,8 @@ export interface McpConfig {
   tableName: string;
   eventsTableName: string;
   templateBucketName: string;
+  eventBusName: string;
+  stackName?: string;
 }
 
 function findProjectRoot(): string {
@@ -43,13 +45,15 @@ export function resolveConfig(): McpConfig {
   const tableName = process.env.TABLE_NAME;
   const eventsTableName = process.env.EVENTS_TABLE_NAME;
   const templateBucketName = process.env.TEMPLATE_BUCKET_NAME;
+  const eventBusName = process.env.EVENT_BUS_NAME;
+  const stackName = process.env.STACK_NAME || undefined;
 
-  if (!tableName || !eventsTableName || !templateBucketName) {
+  if (!tableName || !eventsTableName || !templateBucketName || !eventBusName) {
     throw new Error(
-      "Missing required env vars: TABLE_NAME, EVENTS_TABLE_NAME, TEMPLATE_BUCKET_NAME. " +
+      "Missing required env vars: TABLE_NAME, EVENTS_TABLE_NAME, TEMPLATE_BUCKET_NAME, EVENT_BUS_NAME. " +
         "Ensure .env exists in the repo root or set them in the environment.",
     );
   }
 
-  return { region, tableName, eventsTableName, templateBucketName };
+  return { region, tableName, eventsTableName, templateBucketName, eventBusName, stackName };
 }

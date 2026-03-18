@@ -46,6 +46,18 @@ export async function generateMetadata(props: {
       description: page.data.description,
       url,
       type: "article",
+      images: [
+        {
+          url: "/og-image.png",
+          alt: `${page.data.title} | mailshot`,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description: page.data.description,
+      images: ["/og-image.png"],
     },
   };
 }

@@ -7,7 +7,7 @@
     <img src="https://img.shields.io/badge/Claude-MCP-D97757?logo=anthropic&logoColor=white&style=for-the-badge" />
   </p>
 
-<strong>Open-source email sequences on AWS, managed entirely through Claude Code.</strong>
+<strong>Open-source email sequences on AWS, managed entirely through Claude Code. [mailshot.dev](https://mailshot.dev/)</strong>
 
 </div>
 

@@ -16,6 +16,7 @@ import { listSuppressed, removeSuppression } from "./tools/suppression.js";
 import { getSubscriberEvents, getTemplateEvents, getSequenceEvents } from "./tools/engagement.js";
 import { listTemplates, previewTemplate, validateTemplate } from "./tools/templates.js";
 import { getFailedExecutions, getDeliveryStats } from "./tools/system.js";
+import { listSequences, exportSequence } from "./tools/sequences.js";
 
 const config = resolveConfig();
 
@@ -289,6 +290,44 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(await validateTemplate(config, templateKey), null, 2),
+      },
+    ],
+  }),
+);
+
+// ── Sequences ─────────────────────────────────────────────────────────────
+
+server.registerTool(
+  "list_sequences",
+  {
+    description:
+      "List deployed sequences by discovering S3 template prefixes and Step Functions state machines",
+    inputSchema: {},
+  },
+  async () => ({
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(await listSequences(config), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
+  "export_sequence",
+  {
+    description:
+      "Export a deployed sequence — reverse-parses ASL to SequenceDefinition, fetches templates and EventBridge trigger config",
+    inputSchema: {
+      sequenceId: z.string().describe("The sequence ID to export (kebab-case)"),
+    },
+  },
+  async ({ sequenceId }) => ({
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(await exportSequence(config, sequenceId), null, 2),
       },
     ],
   }),
