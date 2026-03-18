@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 0.2.9
+
+### Patch Changes
+
+- Output cdk.out to build/ directory in scaffolded projects, remove hello-world example references, fix create-sequence skill instructions
+
 ## 0.2.8
 
 ### Patch Changes
