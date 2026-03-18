@@ -36,6 +36,15 @@ function copyDir(src: string, dest: string): void {
 console.log(`Creating ${projectName}...`);
 copyDir(templateDir, targetDir);
 
+// Replace {{PROJECT_NAME}} placeholder in template files
+for (const file of ["README.md", "CLAUDE.md"]) {
+  const filePath = path.join(targetDir, file);
+  if (fs.existsSync(filePath)) {
+    const content = fs.readFileSync(filePath, "utf-8");
+    fs.writeFileSync(filePath, content.replace(/\{\{PROJECT_NAME\}\}/g, path.basename(targetDir)));
+  }
+}
+
 // Install dependencies
 console.log("\nInstalling dependencies...");
 try {

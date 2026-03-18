@@ -1,6 +1,6 @@
 {
   "name": "create-mailshot",
-  "version": "0.2.2",
+  "version": "0.2.7",
   "description": "Create a new mailshot project",
   "license": "MIT",
   "type": "commonjs",

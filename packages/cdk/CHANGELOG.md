@@ -1,5 +1,15 @@
 # @mailshot/cdk
 
+## 0.2.3
+
+### Patch Changes
+
+- Rename project to mailshot and bundle Claude Code skills in scaffolded projects
+
+- Updated dependencies []:
+  - @mailshot/shared@0.2.3
+  - @mailshot/handlers@0.2.3
+
 ## 0.2.0
 
 ### Minor Changes
