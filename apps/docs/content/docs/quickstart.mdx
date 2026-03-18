@@ -1,0 +1,88 @@
+---
+title: Quickstart
+description: Scaffold a new mailshot project and deploy your first email sequence in minutes.
+---
+
+## Prerequisites
+
+- AWS account with SES in production mode
+- Node.js 22+
+- [Claude Code](https://claude.ai/code)
+- pnpm
+
+## Create a project
+
+```bash
+npx create-mailshot my-project
+cd my-project
+claude
+```
+
+This scaffolds a new project with everything wired up — CDK infrastructure, sequence auto-discovery, and Claude Code skills for the full workflow.
+
+## Set up your environment
+
+Tell Claude to set up your environment:
+
+```
+/setup-env
+```
+
+This walks you through choosing an AWS profile, discovering SES identities, configuring sender details, and generating the `.env` file.
+
+## Create a sequence
+
+Describe what you want:
+
+```
+Create a 3-part welcome sequence triggered by customer.created — send a welcome
+email immediately, then a "getting started" email after 1 day, then a
+"tips and tricks" email after 3 days.
+```
+
+Claude generates the sequence config, email templates, and build files.
+
+## Deploy
+
+```
+/deploy
+```
+
+Claude validates all sequences, builds everything, and deploys to your AWS account.
+
+## Manage with MCP
+
+Once deployed, you can manage everything through conversation:
+
+- **"Show me the subscriber user@example.com"** — Claude fetches the full profile, executions, and send history
+- **"What are the open rates for the welcome sequence?"** — Claude queries the engagement table
+- **"Preview the welcome email for user@example.com"** — Claude renders with live data
+- **"Unsubscribe user@example.com"** — Claude marks them as unsubscribed and stops executions
+
+## Project structure
+
+After scaffolding, your project looks like this:
+
+```
+my-project/
+  sequences/
+    <your-sequence>/
+      sequence.config.ts      Sequence definition
+      src/
+        emails/               React Email templates (.tsx)
+        render.ts             Renders .tsx → .html
+      package.json
+      tsconfig.json
+  .env                        AWS configuration
+  .claude/
+    skills/                   Claude Code skills
+  package.json
+  tsconfig.json
+```
+
+## Next steps
+
+- Read about [sequence definitions](/docs/sequences) to understand all step types
+- Learn about [templates](/docs/templates) and Liquid rendering
+- Understand the [architecture](/docs/architecture) and cost model
+- Set up the [MCP server](/docs/mcp-server) for subscriber management

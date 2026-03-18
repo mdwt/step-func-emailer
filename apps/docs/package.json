@@ -1,0 +1,30 @@
+{
+  "name": "@mailshot/docs",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "fumadocs-core": "15.8.5",
+    "fumadocs-mdx": "13.0.8",
+    "fumadocs-ui": "15.8.5",
+    "next": "^15",
+    "react": "^19",
+    "react-dom": "^19",
+    "lucide-react": "^0.468",
+    "geist": "^1"
+  },
+  "devDependencies": {
+    "@types/mdx": "^2",
+    "@types/node": "^22",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5.7",
+    "tailwindcss": "^4",
+    "@tailwindcss/postcss": "^4"
+  }
+}

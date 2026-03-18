@@ -1,0 +1,19 @@
+{
+  "title": "Docs",
+  "pages": [
+    "index",
+    "---Getting Started---",
+    "quickstart",
+    "deployment",
+    "---Core Concepts---",
+    "architecture",
+    "sequences",
+    "templates",
+    "subscribers",
+    "events",
+    "---Reference---",
+    "dynamo-schema",
+    "mcp-server",
+    "skills"
+  ]
+}

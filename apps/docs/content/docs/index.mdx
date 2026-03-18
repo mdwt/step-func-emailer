@@ -1,0 +1,44 @@
+---
+title: Introduction
+description: Serverless email sequencing framework on AWS, managed entirely through Claude Code.
+---
+
+mailshot is a serverless email sequencing framework on AWS, designed so that a single person can create, deploy, manage, and query email sequences entirely through AI (Claude Code) at near-zero cost.
+
+The core idea: describe what you want in natural language, and Claude Code handles the rest — generating sequence configs, rendering templates, deploying infrastructure, managing subscribers, and monitoring delivery. No dashboard, no SaaS fees, no vendor lock-in.
+
+## How it works
+
+```
+Your app backend
+    │
+    │  publishes events
+    ▼
+EventBridge ──→ Step Functions ──→ SendEmailFn ──→ SES
+                                       │
+                                  S3 (templates)
+                                  DynamoDB (state)
+```
+
+1. Your app publishes an event (e.g., `customer.created`) to EventBridge
+2. An EventBridge rule starts a Step Functions state machine
+3. The state machine walks through send/wait/choice/condition steps
+4. Each send step invokes a Lambda that fetches a template from S3, renders it with LiquidJS, and sends via SES
+5. Bounces, complaints, opens, clicks, and deliveries are tracked automatically
+
+Everything is defined in code, deployed with CDK, and managed through Claude Code.
+
+## Documentation
+
+| Section | What it covers |
+| --- | --- |
+| [Quickstart](/docs/quickstart) | Scaffold a project and deploy your first sequence |
+| [Architecture](/docs/architecture) | System overview, AWS services, data flow, cost model |
+| [Sequences](/docs/sequences) | Defining email sequences with send, wait, choice, and condition steps |
+| [Templates](/docs/templates) | React Email components, Liquid rendering, template lifecycle |
+| [Subscribers](/docs/subscribers) | Subscriber profiles, lifecycle states, suppression, unsubscribe |
+| [Events & Engagement](/docs/events) | EventBridge ingestion, SES engagement tracking, analytics |
+| [DynamoDB Schema](/docs/dynamo-schema) | Single-table design, key patterns, TTLs, GSIs |
+| [Deployment](/docs/deployment) | Environment setup, build pipeline, CDK deploy workflow |
+| [MCP Server](/docs/mcp-server) | AI-driven management — subscriber ops, engagement queries, template preview |
+| [Skills & Workflows](/docs/skills) | Claude Code skills for creating, validating, and deploying sequences |
