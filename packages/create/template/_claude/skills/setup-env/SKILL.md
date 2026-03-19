@@ -247,5 +247,8 @@ Environment configured:
 - IAM user: <new-profile-name> (least-privilege) — if created
 - MCP server: registered (restart Claude Code to activate)
 
-Run /deploy when you're ready to deploy.
+Next steps:
+1. Create a sequence: /create-sequence <describe your email flow>
+2. Validate it: /validate-sequence
+3. Deploy to AWS: /deploy
 ```
