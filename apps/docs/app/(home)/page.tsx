@@ -170,8 +170,7 @@ function Problem() {
               Free &amp; MIT licensed
             </p>
             <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
-              mailshot is open source. You deploy it to your own AWS account and pay AWS directly —
-              no middleman, no per-seat pricing, no vendor lock-in.
+              mailshot is open source. You deploy it to your own AWS account and pay AWS directly.
             </p>
           </div>
           <div>
@@ -202,22 +201,22 @@ function SequenceCode() {
       <div className="grid items-start gap-12 lg:grid-cols-[1fr,1.2fr]">
         <div>
           <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
-            Sequences as code
+            AI-generated sequences
           </p>
           <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-            TypeScript in, Step Functions out
+            Describe it, AI builds it
           </h2>
           <p className="mt-4 text-fd-muted-foreground leading-relaxed">
-            Define triggers, steps, delays, and conditional branches in a typed config file. Drop it
-            in{" "}
+            Tell Claude Code what sequence you want and it generates the full config — triggers,
+            steps, delays, conditional branches, and email templates. Everything lands in{" "}
             <code className="rounded border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-xs">
               sequences/
             </code>{" "}
-            — CDK auto-discovers it at build time and generates the state machine.
+            as structured code that CDK auto-discovers and deploys as a Step Functions state machine.
           </p>
           <p className="mt-3 text-fd-muted-foreground leading-relaxed">
-            Templates are React Email, MJML, or raw HTML. Rendered with LiquidJS at send time,
-            stored in S3.
+            No manual config writing. You describe the flow, AI produces the artifacts, you review
+            and deploy.
           </p>
           <Link
             href="/docs/sequences"
