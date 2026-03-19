@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 1.1.0
+
+### Minor Changes
+
+- [`2d07c53`](https://github.com/mdwt/mailshot/commit/2d07c533be165b3800d189a9e1b4482d8d7d68db) Thanks [@mdwt](https://github.com/mdwt)! - Derive templateKeys and render output path from config id variable, remove @mailshot namespace from sequence packages, and add rename instructions
+
 ## 1.0.4
 
 ### Patch Changes
