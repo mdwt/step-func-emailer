@@ -3,7 +3,6 @@ import * as cdk from "aws-cdk-lib";
 import type { Construct } from "constructs";
 import type { MailshotConfig, SequenceDefinition } from "@mailshot/shared";
 import { StorageConstruct } from "./constructs/storage.js";
-import { SsmConstruct } from "./constructs/ssm-params.js";
 import { LambdasConstruct } from "./constructs/lambdas.js";
 import { SesConfigConstruct } from "./constructs/ses-config.js";
 import { StateMachinesConstruct } from "./constructs/state-machines.js";
@@ -42,9 +41,12 @@ export class MailshotStack extends cdk.Stack {
       table: storage.table,
       eventsTable: storage.eventsTable,
       templateBucket: storage.templateBucket,
-      ssmPrefix: config.ssmPrefix,
       snsTopic: sesConfig.snsTopic,
       sesConfigSetName: config.sesConfigSetName,
+      defaultFromEmail: config.defaultFromEmail,
+      defaultFromName: config.defaultFromName,
+      replyToEmail: config.replyToEmail,
+      unsubscribeSecret: config.unsubscribeSecret,
       handlersPath: props.handlersPath,
     });
 
@@ -52,20 +54,6 @@ export class MailshotStack extends cdk.Stack {
     sesConfig.engagementTopic.addSubscription(
       new cdk.aws_sns_subscriptions.LambdaSubscription(lambdas.engagementHandlerFn),
     );
-
-    // ── SSM Parameters ───────────────────────────────────────────────────
-    new SsmConstruct(this, "SsmParams", {
-      prefix: config.ssmPrefix,
-      tableName: storage.table.tableName,
-      eventsTableName: storage.eventsTable.tableName,
-      templateBucketName: storage.templateBucket.bucketName,
-      defaultFromEmail: config.defaultFromEmail,
-      defaultFromName: config.defaultFromName,
-      replyToEmail: config.replyToEmail,
-      sesConfigSetName: config.sesConfigSetName,
-      unsubscribeBaseUrl: lambdas.unsubscribeFnUrl,
-      unsubscribeSecret: config.unsubscribeSecret,
-    });
 
     // ── State machines ───────────────────────────────────────────────────
     const stateMachines = new StateMachinesConstruct(this, "StateMachines", {

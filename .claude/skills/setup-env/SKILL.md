@@ -180,9 +180,7 @@ Ask the user for a **project prefix** to use for naming resources. Default to `m
 - `EVENT_BUS_NAME` → `<prefix>-bus`
 - `SES_CONFIG_SET_NAME` → from step 4, or `<prefix>-config`
 - `SNS_TOPIC_NAME` → `<prefix>-ses-notifications`
-- `SSM_PREFIX` → `/<prefix>`
-
-Present the generated names to the user and let them confirm or adjust.
+  Present the generated names to the user and let them confirm or adjust.
 
 ### Step 6: Generate unsubscribe secret
 
@@ -213,7 +211,6 @@ DEFAULT_FROM_EMAIL=<fromEmail>
 DEFAULT_FROM_NAME=<fromName>
 REPLY_TO_EMAIL=<replyToEmail>  # omit line if blank
 UNSUBSCRIBE_SECRET=<secret>
-SSM_PREFIX=<ssmPrefix>
 ```
 
 ### Step 8: Set up MCP server

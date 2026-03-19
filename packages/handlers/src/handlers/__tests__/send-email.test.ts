@@ -26,7 +26,7 @@ vi.mock("@aws-sdk/client-sfn", () => ({
   },
 }));
 
-vi.mock("../../lib/ssm-config.js", () => ({
+vi.mock("../../lib/config.js", () => ({
   resolveConfig: () => mockResolveConfig(),
 }));
 
@@ -87,7 +87,7 @@ const CONFIG = {
 };
 
 beforeEach(() => {
-  mockResolveConfig.mockReset().mockResolvedValue(CONFIG);
+  mockResolveConfig.mockReset().mockReturnValue(CONFIG);
   mockGetSubscriberProfile.mockReset();
   mockUpsertSubscriberProfile.mockReset().mockResolvedValue(undefined);
   mockGetExecution.mockReset();

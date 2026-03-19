@@ -47,7 +47,6 @@ const config: MailshotConfig = {
   defaultFromName: required("DEFAULT_FROM_NAME"),
   replyToEmail: process.env.REPLY_TO_EMAIL || undefined,
   unsubscribeSecret: required("UNSUBSCRIBE_SECRET"),
-  ssmPrefix: required("SSM_PREFIX"),
 };
 
 const definitions = loadSequenceConfigs();

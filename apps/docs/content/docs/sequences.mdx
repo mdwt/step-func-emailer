@@ -68,7 +68,7 @@ Invokes SendEmailFn to deliver an email:
 
 ### Wait
 
-Pauses the Step Functions execution. No compute runs during the wait — this is free.
+Pauses the Step Functions execution until the specified duration elapses.
 
 ```typescript
 { type: "wait", days: 2 }
@@ -120,7 +120,7 @@ Available checks:
 | --- | --- | --- |
 | **Evaluated by** | Step Functions (native) | Lambda (CheckConditionFn) |
 | **Data source** | Execution input (event payload) | DynamoDB (live query) |
-| **Cost** | Free (state transition only) | Lambda invocation + DynamoDB read |
+| **Cost** | State transition only | Lambda invocation + DynamoDB read |
 | **Use when** | Branching on subscriber attributes from the triggering event | Checking send history or profile changes after sequence start |
 
 ## Fire-and-forget events

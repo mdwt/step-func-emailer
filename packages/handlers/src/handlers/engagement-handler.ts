@@ -3,7 +3,7 @@ import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
 import { subscriberPK, eventSK, EVENT_TTL_DAYS } from "@mailshot/shared";
 import type { EmailEventType } from "@mailshot/shared";
-import { resolveConfig } from "../lib/ssm-config.js";
+import { resolveConfig } from "../lib/config.js";
 import { createLogger } from "../lib/logger.js";
 
 const logger = createLogger("engagement-handler");
@@ -103,7 +103,7 @@ const EVENT_TYPE_MAP: Record<string, EmailEventType> = {
 
 export const handler = async (event: SNSEvent): Promise<void> => {
   logger.info("EngagementHandler invoked", { recordCount: event.Records.length });
-  const config = await resolveConfig();
+  const config = resolveConfig();
 
   for (const record of event.Records) {
     const notification = JSON.parse(record.Sns.Message) as SESEventNotification;

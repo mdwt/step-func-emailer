@@ -1,6 +1,6 @@
 import { SFNClient, StopExecutionCommand } from "@aws-sdk/client-sfn";
 import type { SendEmailInput, RegisterOutput, SendOutput } from "@mailshot/shared";
-import { resolveConfig } from "../lib/ssm-config.js";
+import { resolveConfig } from "../lib/config.js";
 import {
   getSubscriberProfile,
   upsertSubscriberProfile,
@@ -23,7 +23,7 @@ export const handler = async (
   event: SendEmailInput,
 ): Promise<RegisterOutput | SendOutput | { completed: true }> => {
   logger.info("SendEmail invoked", { action: event.action, email: event.subscriber.email });
-  const config = await resolveConfig();
+  const config = resolveConfig();
 
   switch (event.action) {
     case "register":
@@ -58,7 +58,7 @@ export const handler = async (
 
 async function handleRegister(
   event: Extract<SendEmailInput, { action: "register" }>,
-  config: Awaited<ReturnType<typeof resolveConfig>>,
+  config: ReturnType<typeof resolveConfig>,
 ): Promise<RegisterOutput> {
   logger.info("Registering subscriber for sequence", {
     email: event.subscriber.email,
@@ -127,7 +127,7 @@ async function handleRegister(
 
 async function handleSend(
   event: Extract<SendEmailInput, { action: "send" }>,
-  config: Awaited<ReturnType<typeof resolveConfig>>,
+  config: ReturnType<typeof resolveConfig>,
   sequenceId: string = "unknown",
 ): Promise<SendOutput> {
   logger.info("Processing send", {

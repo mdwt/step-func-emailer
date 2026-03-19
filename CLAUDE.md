@@ -36,8 +36,8 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 ### Monorepo packages (pnpm workspaces)
 
 - **`shared`** — Types and constants consumed by handlers and CDK. Must build first. Exports key helpers like `subscriberPK()`, `executionSK()`, `sentSK()` for DynamoDB key construction.
-- **`handlers`** — Five Lambda functions + shared lib modules. All handlers read config from SSM Parameter Store at runtime (cached 5min via `lib/ssm-config.ts`).
-- **`cdk`** — AWS CDK infrastructure. Config is loaded from a root `.env` file (see `.env.example`). All environment variables are stored as SSM parameters (not Lambda env vars directly). Entry point: `bin/app.ts`.
+- **`handlers`** — Five Lambda functions + shared lib modules. All handlers read config from Lambda environment variables (via `lib/config.ts`).
+- **`cdk`** — AWS CDK infrastructure. Config is loaded from a root `.env` file (see `.env.example`). All config values are passed as Lambda environment variables at deploy time. Entry point: `bin/app.ts`.
 - **`mcp`** — MCP server (`@mailshot/mcp`) for interacting with the email system from Claude Code. Provides tools for subscriber management, engagement analytics, template preview, and system health. Spawned over stdio, uses local AWS credentials. Setup: `claude mcp add mailshot -e AWS_PROFILE=<profile> -- npx @mailshot/mcp` (reads config from `.env`).
 - **`create`** — `create-mailshot` CLI that scaffolds new user projects. Run with `npx create-mailshot my-project`. Template files are embedded in the package.
 
@@ -60,15 +60,14 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 ### CDK constructs (in `lib/constructs/`)
 
 - **storage** — DynamoDB main table + events table + S3 template bucket + BucketDeployment
-- **ssm-params** — Writes all config as SSM parameters under configurable prefix
-- **lambdas** — Five NodejsFunction Lambdas with esbuild bundling (AWS SDK externalized)
+- **lambdas** — Five NodejsFunction Lambdas with esbuild bundling (AWS SDK externalized). Config passed as environment variables
 - **ses-config** — SES configuration set + SNS topics for bounce/complaint and engagement events
 - **state-machines** — Step Functions definitions (auto-discovered from sequences)
 - **event-bus** — Custom EventBridge bus + routing rules
 
 ### Handler lib modules
 
-- **ssm-config** — Resolves all config from SSM with caching
+- **config** — Resolves all config from Lambda environment variables
 - **dynamo-client** — All DynamoDB operations (profile CRUD, execution tracking, send log, suppression). Exports `extractAttributes(profile)` to separate custom attributes from system columns
 - **template-renderer** — S3 fetch + LiquidJS render with 10min cache
 - **ses-sender** — SES v2 SendEmail with List-Unsubscribe headers. `templateKey` and `sequenceId` are sent as custom headers (`X-Template-Key`, `X-Sequence-Id`) for engagement tracking, and as SES EmailTags (with `/` replaced by `--` in tag values since SES doesn't allow `/` in tags)
@@ -132,11 +131,11 @@ Add rate limit headers to SES sender responses
 
 ### Bump type guide
 
-| Change type                                                 | Bump    | Examples                                             |
-| ----------------------------------------------------------- | ------- | ---------------------------------------------------- |
-| Bug fix, typo, minor correction                             | `patch` | Fix SES tag encoding, fix DynamoDB key format        |
-| New feature, new handler, new config option                 | `minor` | Add engagement tracking, add display name mappings   |
-| Breaking API/type change, removed feature, schema migration | `major` | Change Subscriber type shape, rename SSM param paths |
+| Change type                                                 | Bump    | Examples                                           |
+| ----------------------------------------------------------- | ------- | -------------------------------------------------- |
+| Bug fix, typo, minor correction                             | `patch` | Fix SES tag encoding, fix DynamoDB key format      |
+| New feature, new handler, new config option                 | `minor` | Add engagement tracking, add display name mappings |
+| Breaking API/type change, removed feature, schema migration | `major` | Change Subscriber type shape, rename env var keys  |
 
 ### Applying changesets (releasing)
 

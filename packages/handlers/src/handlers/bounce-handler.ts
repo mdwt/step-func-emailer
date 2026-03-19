@@ -1,5 +1,5 @@
 import type { SNSEvent } from "aws-lambda";
-import { resolveConfig } from "../lib/ssm-config.js";
+import { resolveConfig } from "../lib/config.js";
 import { writeSuppression, setProfileFlag } from "../lib/dynamo-client.js";
 import { stopAllExecutions } from "../lib/execution-stopper.js";
 import { addToSuppressionList } from "../lib/ses-suppression.js";
@@ -28,7 +28,7 @@ type SESNotification = SESBounceNotification | SESComplaintNotification;
 
 export const handler = async (event: SNSEvent): Promise<void> => {
   logger.info("BounceHandler invoked", { recordCount: event.Records.length });
-  const config = await resolveConfig();
+  const config = resolveConfig();
 
   for (const record of event.Records) {
     const notification = JSON.parse(record.Sns.Message) as SESNotification;

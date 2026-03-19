@@ -4,7 +4,7 @@ import type { SNSEvent } from "aws-lambda";
 const mockResolveConfig = vi.fn();
 const mockSend = vi.fn();
 
-vi.mock("../../lib/ssm-config.js", () => ({
+vi.mock("../../lib/config.js", () => ({
   resolveConfig: () => mockResolveConfig(),
 }));
 
@@ -46,7 +46,7 @@ const baseHeaders = [
 ];
 
 beforeEach(() => {
-  mockResolveConfig.mockReset().mockResolvedValue(CONFIG);
+  mockResolveConfig.mockReset().mockReturnValue(CONFIG);
   mockSend.mockReset().mockResolvedValue({});
 });
 

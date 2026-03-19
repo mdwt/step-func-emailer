@@ -1,15 +1,26 @@
 import Link from "next/link";
-import { ArrowRight, ChevronRight, Copy } from "lucide-react";
+import {
+  ArrowRight,
+  Copy,
+  Mail,
+  GitBranch,
+  Shield,
+  Zap,
+  Database,
+  Star,
+  Terminal as TerminalIcon,
+} from "lucide-react";
 
 export default function HomePage() {
   return (
-    <main className="flex flex-col gap-16 sm:gap-20 md:gap-32">
+    <main>
       <Hero />
-      <Workflow />
+      <Problem />
       <SequenceCode />
+      <HowItWorks />
+      <ArchitectureDiagram />
       <Features />
       <MCPTools />
-      <Architecture />
       <Packages />
       <CTA />
       <Footer />
@@ -21,32 +32,65 @@ export default function HomePage() {
 
 function Hero() {
   return (
-    <section className="mx-auto w-full max-w-4xl px-6 pt-24 md:pt-36">
-      <div className="flex flex-col items-center gap-8 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full bg-fd-muted/60 px-4 py-1.5 text-sm text-fd-muted-foreground">
-          <span className="inline-block h-1.5 w-1.5 rounded-full bg-green-500" />
-          Open source &middot; MIT licensed
+    <section className="relative overflow-hidden bg-fd-muted/40 dark:bg-fd-muted/20">
+      {/* Film grain texture */}
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.35] dark:opacity-[0.5] mix-blend-overlay"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundSize: "128px 128px",
+        }}
+      />
+      {/* Subtle gradient overlay */}
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-fd-background/80" />
+      <div className="relative mx-auto w-full max-w-4xl px-6 pt-24 pb-28 md:pt-36 md:pb-36">
+        <div className="flex flex-col items-center gap-8 text-center">
+          <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-5xl md:text-6xl">
+            Email sequences
+            <br />
+            <span className="text-fd-muted-foreground">on your AWS account</span>
+          </h1>
+
+          <p className="max-w-xl text-balance text-fd-muted-foreground leading-relaxed sm:text-lg">
+            Open-source framework for serverless email sequences. Step Functions for orchestration,
+            SES for delivery, DynamoDB for state. Operated through Claude Code.
+          </p>
+
+          <div className="flex flex-col items-center gap-4 sm:flex-row">
+            <Installer />
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-muted-foreground underline-offset-4 hover:text-fd-foreground hover:underline transition-colors"
+            >
+              Documentation
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+            <a
+              href="https://github.com/mdwt/mailshot"
+              className="inline-flex items-center gap-1.5 text-sm text-fd-muted-foreground transition-colors hover:text-fd-foreground"
+            >
+              <Star className="h-3.5 w-3.5" />
+              GitHub
+            </a>
+          </div>
+
+          <Terminal />
         </div>
-        <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
-          Email sequences on AWS,{" "}
-          <span className="text-fd-muted-foreground">managed through AI</span>
-        </h1>
-        <p className="max-w-2xl text-balance text-fd-muted-foreground sm:text-lg">
-          mailshot is an open-source framework that puts email sequencing, subscriber management,
-          engagement analytics, and deployment inside Claude Code. Describe what you want, AI
-          handles the rest.
-        </p>
-        <div className="flex flex-col items-center gap-4 sm:flex-row">
-          <Installer />
-          <Link
-            href="/docs"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-muted-foreground underline-offset-4 hover:underline"
-          >
-            Documentation
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
-        </div>
-        <Terminal />
+      </div>
+      {/* Wavy bottom edge */}
+      <div className="absolute bottom-0 left-0 right-0 translate-y-px">
+        <svg
+          viewBox="0 0 1440 56"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          className="block w-full h-auto"
+          preserveAspectRatio="none"
+        >
+          <path
+            d="M0 24C240 48 480 56 720 40C960 24 1200 8 1440 32V56H0V24Z"
+            className="fill-fd-background"
+          />
+        </svg>
       </div>
     </section>
   );
@@ -56,174 +100,320 @@ function Installer() {
   return (
     <button
       type="button"
-      className="group inline-flex h-10 items-center gap-3 rounded-full bg-fd-primary px-5 text-sm font-medium text-fd-primary-foreground transition-all active:translate-y-px"
+      className="group inline-flex h-10 items-center gap-3 rounded-lg bg-ms-orange px-5 text-sm font-medium text-white transition-all hover:brightness-110 active:translate-y-px"
     >
-      <code>npx create-mailshot</code>
-      <Copy className="h-3.5 w-3.5 opacity-50 transition-opacity group-hover:opacity-100" />
+      <code className="font-mono">npx create-mailshot</code>
+      <Copy className="h-3.5 w-3.5 opacity-40 transition-opacity group-hover:opacity-70" />
     </button>
   );
 }
 
 function Terminal() {
   return (
-    <div className="w-full max-w-xl overflow-hidden rounded-xl bg-fd-card shadow-lg ring-1 ring-fd-border">
-      <div className="flex items-center gap-2 bg-fd-muted/40 px-4 py-2">
-        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/20" />
-        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/20" />
-        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/20" />
+    <div className="w-full max-w-xl overflow-hidden rounded-xl border border-fd-border bg-fd-card shadow-sm">
+      <div className="flex items-center gap-2 border-b border-fd-border/60 px-4 py-2.5">
+        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/15" />
+        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/15" />
+        <span className="h-2.5 w-2.5 rounded-full bg-fd-muted-foreground/15" />
+        <span className="ml-2 font-mono text-[11px] text-fd-muted-foreground/60">~/my-project</span>
       </div>
-      <div className="p-5 font-mono text-[13px] leading-relaxed text-left">
-        <Line prompt>npx create-mailshot my-project</Line>
-        <Line prompt>cd my-project &amp;&amp; claude</Line>
-        <Line dim>
-          &gt; &ldquo;Create a 5-part onboarding sequence triggered by customer.created&rdquo;
-        </Line>
-        <Line green>✓ Generated sequence config, 5 templates, deploy files</Line>
-        <Line dim>&gt; &ldquo;Deploy&rdquo;</Line>
-        <Line green>✓ Deployed to AWS (us-east-1)</Line>
+      <div className="p-5 font-mono text-[13px] leading-[1.7] text-left">
+        <TLine prompt>npx create-mailshot my-project</TLine>
+        <TLine prompt>cd my-project &amp;&amp; claude</TLine>
+        <TLine dim>&gt; Create a 5-part onboarding drip triggered by customer.created</TLine>
+        <TLine ok>✓ sequence config + 5 email templates + render script</TLine>
+        <TLine dim>&gt; Deploy to production</TLine>
+        <TLine ok>✓ CDK deployed — Step Functions, EventBridge, S3 templates</TLine>
+        <TLine dim>&gt; How are open rates on the onboarding sequence?</TLine>
+        <TLine ok>✓ 68% delivered, 42% opened, 12% clicked across 340 sends</TLine>
       </div>
     </div>
   );
 }
 
-function Line({
+function TLine({
   children,
   prompt,
   dim,
-  green,
+  ok,
 }: {
   children: React.ReactNode;
   prompt?: boolean;
   dim?: boolean;
-  green?: boolean;
+  ok?: boolean;
 }) {
   return (
     <p
       className={
-        green ? "text-green-600 dark:text-green-400" : dim ? "text-fd-muted-foreground" : ""
+        ok
+          ? "text-emerald-600 dark:text-emerald-400"
+          : dim
+            ? "text-fd-muted-foreground/70"
+            : "text-fd-foreground"
       }
     >
-      {prompt && <span className="text-fd-muted-foreground">$ </span>}
+      {prompt && <span className="text-fd-muted-foreground/50">$ </span>}
       {children}
     </p>
   );
 }
 
-/* ── Workflow ─────────────────────────────────────────────── */
+/* ── Why ─────────────────────────────────────────────────── */
 
-function Workflow() {
+function Problem() {
   return (
-    <section className="mx-auto w-full max-w-4xl px-6">
-      <SectionHeader
-        label="AI-native workflow"
-        title="The whole lifecycle lives in Claude Code"
-        description="Generate email content, design sequences, deploy infrastructure, query engagement metrics, optimize performance. mailshot ships with an MCP server and Claude Code skills that give AI full access to your running system."
-      />
-      <div className="mt-12 space-y-2">
-        <WorkflowStep
-          prompt="Create a 3-part re-engagement sequence for users inactive for 30 days"
-          result="Generates TypeScript sequence config, 3 email templates with LiquidJS placeholders, and render script"
-        />
-        <WorkflowStep
-          prompt="Preview the day-3 email for jane@acme.com"
-          result="Fetches subscriber profile from DynamoDB, renders template with live data"
-        />
-        <WorkflowStep
-          prompt="Deploy"
-          result="Validates types, checks template references, synthesizes CDK, deploys to AWS"
-        />
-        <WorkflowStep
-          prompt="How are open rates on the re-engagement sequence?"
-          result="Queries engagement table — 68% delivered, 42% opened, 12% clicked across 340 sends"
-        />
+    <section className="border-y border-fd-border/50 bg-fd-muted/30">
+      <div className="mx-auto w-full max-w-5xl px-6 py-16 sm:py-20">
+        <div className="grid gap-10 sm:grid-cols-3 sm:gap-12">
+          <div>
+            <p className="font-mono text-sm font-bold text-fd-foreground">
+              Free &amp; MIT licensed
+            </p>
+            <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
+              mailshot is open source. You deploy it to your own AWS account and pay AWS directly —
+              no middleman, no per-seat pricing, no vendor lock-in.
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-sm font-bold text-fd-foreground">Cheap to run</p>
+            <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
+              A 5-email sequence costs ~$0.30 per 1,000 runs in Step Functions, plus $0.50 in SES
+              sends. At 10k subscribers you{"'"}re looking at under $10/month total AWS bill.
+            </p>
+          </div>
+          <div>
+            <p className="font-mono text-sm font-bold text-fd-foreground">Pay-per-execution</p>
+            <p className="mt-2 text-sm leading-relaxed text-fd-muted-foreground">
+              No fixed costs. You pay AWS for state transitions, email sends, and DynamoDB reads.
+              Nothing runs between emails. You only pay when a step executes.
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   );
 }
 
-function WorkflowStep({ prompt, result }: { prompt: string; result: string }) {
-  return (
-    <div className="rounded-xl bg-fd-muted/40 p-5">
-      <p className="text-sm font-medium">&ldquo;{prompt}&rdquo;</p>
-      <p className="mt-1.5 text-sm text-fd-muted-foreground">{result}</p>
-    </div>
-  );
-}
-
-/* ── Sequences as code ───────────────────────────────────── */
+/* ── Sequence as code ────────────────────────────────────── */
 
 function SequenceCode() {
   return (
-    <section className="mx-auto w-full max-w-5xl px-6">
-      <div className="grid items-start gap-12 lg:grid-cols-2">
+    <section className="mx-auto w-full max-w-5xl px-6 py-20 md:py-32">
+      <div className="grid items-start gap-12 lg:grid-cols-[1fr,1.2fr]">
         <div>
-          <SectionHeader
-            label="Sequences as code"
-            title="AI generates it, you review it"
-            description="Describe a sequence in natural language. Claude Code generates the typed TypeScript config with triggers, steps, delays, and conditional branches. Drop it in sequences/ — auto-discovered at build time, CDK generates the Step Functions state machine."
-            align="left"
-          />
-          <p className="mt-4 text-sm text-fd-muted-foreground leading-relaxed">
-            Templates work the same way. AI writes the email content, mailshot renders it with
-            LiquidJS at send time. Use React Email, MJML, or raw HTML &mdash; anything that produces{" "}
-            <code className="rounded bg-fd-muted px-1.5 py-0.5 font-mono text-xs">.html</code>.
+          <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+            Sequences as code
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+            TypeScript in, Step Functions out
+          </h2>
+          <p className="mt-4 text-fd-muted-foreground leading-relaxed">
+            Define triggers, steps, delays, and conditional branches in a typed config file. Drop it
+            in{" "}
+            <code className="rounded border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-xs">
+              sequences/
+            </code>{" "}
+            — CDK auto-discovers it at build time and generates the state machine.
+          </p>
+          <p className="mt-3 text-fd-muted-foreground leading-relaxed">
+            Templates are React Email, MJML, or raw HTML. Rendered with LiquidJS at send time,
+            stored in S3.
           </p>
           <Link
             href="/docs/sequences"
-            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-fd-primary underline-offset-4 hover:underline"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground underline-offset-4 hover:underline"
           >
             Sequence docs
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-        <div className="overflow-hidden rounded-xl bg-fd-card ring-1 ring-fd-border">
-          <div className="bg-fd-muted/40 px-4 py-2">
-            <span className="font-mono text-xs text-fd-muted-foreground">
-              sequences/welcome/sequence.config.ts
-            </span>
-          </div>
-          <pre className="overflow-x-auto p-5 text-[13px] leading-relaxed">
-            <code>{`import type { SequenceDefinition }
-  from "@mailshot/shared";
 
-export default {
-  id: "welcome",
-  trigger: {
-    detailType: "customer.created",
-    subscriberMapping: {
-      email: "$.detail.email",
-      firstName: "$.detail.firstName",
-    },
-  },
-  steps: [
-    { type: "send",
-      templateKey: "welcome/hello",
-      subject: "Welcome aboard" },
-    { type: "wait", days: 2 },
-    { type: "send",
-      templateKey: "welcome/getting-started",
-      subject: "Getting started" },
-    { type: "wait", days: 3 },
-    { type: "choice",
-      field: "$.subscriber.attributes.plan",
-      branches: [
-        { value: "pro", steps: [
-          { type: "send",
-            templateKey: "welcome/pro-tips",
-            subject: "Pro tips" },
-        ]},
-        { value: "free", steps: [
-          { type: "send",
-            templateKey: "welcome/upgrade",
-            subject: "Ready for more?" },
-        ]},
-      ],
-    },
-  ],
-} satisfies SequenceDefinition;`}</code>
+        <div className="overflow-hidden rounded-xl border border-fd-border bg-fd-card">
+          <div className="flex items-center border-b border-fd-border/60 px-4 py-2.5">
+            <span className="font-mono text-xs text-fd-muted-foreground">sequence.config.ts</span>
+          </div>
+          <pre className="overflow-x-auto p-5 text-[13px] leading-[1.75]">
+            <code>
+              <span className="text-fd-muted-foreground">
+                {'import type { SequenceDefinition }\n  from "@mailshot/shared";\n\n'}
+              </span>
+              <span>{"export default {\n"}</span>
+              <span>{"  id: "}</span>
+              <span className="text-ms-blue">{'"welcome"'}</span>
+              <span>{",\n"}</span>
+              <span>{"  trigger: {\n"}</span>
+              <span>{"    detailType: "}</span>
+              <span className="text-ms-blue">{'"customer.created"'}</span>
+              <span>{",\n"}</span>
+              <span className="text-fd-muted-foreground">
+                {
+                  '    subscriberMapping: {\n      email: "$.detail.email",\n      firstName: "$.detail.firstName",\n    },\n'
+                }
+              </span>
+              <span>{"  },\n"}</span>
+              <span>{"  steps: [\n"}</span>
+              <span>{"    { type: "}</span>
+              <span className="text-ms-blue">{'"send"'}</span>
+              <span>{",\n      templateKey: "}</span>
+              <span className="text-ms-blue">{'"welcome/hello"'}</span>
+              <span>{",\n      subject: "}</span>
+              <span className="text-ms-blue">{'"Welcome aboard"'}</span>
+              <span>{" },\n"}</span>
+              <span>{"    { type: "}</span>
+              <span className="text-ms-blue">{'"wait"'}</span>
+              <span>{", days: 2 },\n"}</span>
+              <span>{"    { type: "}</span>
+              <span className="text-ms-blue">{'"send"'}</span>
+              <span>{", ... },\n"}</span>
+              <span>{"    { type: "}</span>
+              <span className="text-ms-blue">{'"choice"'}</span>
+              <span>{",\n      field: "}</span>
+              <span className="text-ms-blue">{'"$.subscriber.attributes.plan"'}</span>
+              <span>{",\n      branches: [\n"}</span>
+              <span>{"        { value: "}</span>
+              <span className="text-ms-blue">{'"pro"'}</span>
+              <span>{", steps: [...] },\n"}</span>
+              <span>{"        { value: "}</span>
+              <span className="text-ms-blue">{'"free"'}</span>
+              <span>{", steps: [...] },\n"}</span>
+              <span>{"      ],\n"}</span>
+              <span>{"    },\n"}</span>
+              <span>{"  ],\n"}</span>
+              <span>{"} "}</span>
+              <span className="text-fd-muted-foreground">{"satisfies SequenceDefinition;"}</span>
+            </code>
           </pre>
         </div>
       </div>
+    </section>
+  );
+}
+
+/* ── How it works ────────────────────────────────────────── */
+
+function HowItWorks() {
+  const steps = [
+    {
+      step: "01",
+      title: "Scaffold",
+      command: "npx create-mailshot my-project",
+      text: "Sets up the monorepo with CDK, shared types, handlers, and an MCP server wired to your AWS account.",
+    },
+    {
+      step: "02",
+      title: "Create sequences",
+      command: "/create-sequence onboarding drip triggered by customer.created",
+      text: "Claude Code generates the TypeScript config, email templates, and render script. Review, tweak, commit.",
+    },
+    {
+      step: "03",
+      title: "Deploy",
+      command: "/deploy",
+      text: "Validates types, checks template references, synthesizes CDK, deploys Step Functions + EventBridge + S3 templates.",
+    },
+    {
+      step: "04",
+      title: "Operate",
+      command: 'mcp: "What are open rates on onboarding?"',
+      text: "16 MCP tools let you query engagement, manage subscribers, preview templates, and debug — without leaving your editor.",
+    },
+  ];
+
+  return (
+    <section className="border-y border-fd-border/50 bg-fd-muted/20">
+      <div className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+        <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+          Workflow
+        </p>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+          From zero to sending in minutes
+        </h2>
+        <div className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-4">
+          {steps.map((s) => (
+            <div key={s.step}>
+              <span className="font-mono text-xs font-bold tracking-wider text-fd-muted-foreground/50">
+                {s.step}
+              </span>
+              <h3 className="mt-2 text-sm font-bold">{s.title}</h3>
+              <p className="mt-1 font-mono text-xs text-fd-muted-foreground break-all">
+                {s.command}
+              </p>
+              <p className="mt-3 text-sm leading-relaxed text-fd-muted-foreground">{s.text}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ── Architecture ────────────────────────────────────────── */
+
+function ArchitectureDiagram() {
+  return (
+    <section className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+      <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+        Architecture
+      </p>
+      <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Data flow</h2>
+      <p className="mt-4 max-w-2xl text-fd-muted-foreground leading-relaxed">
+        Your app publishes events to EventBridge. Rules route to Step Functions for sequences or
+        Lambda for one-off sends. SES delivers with full engagement tracking back into DynamoDB.
+      </p>
+
+      <div className="mt-10 overflow-x-auto rounded-xl border border-fd-border bg-fd-card">
+        <pre className="p-6 font-mono text-[12px] leading-[1.6] sm:text-[13px]">{`┌──────────────────────────────────┐
+│ Your App Backend                 │
+│ publishes events to EventBridge  │
+└───────────────┬──────────────────┘
+                │
+                ▼
+┌──────────────────────────────────┐
+│ EventBridge (Custom Bus)         │
+│                                  │
+│ Sequence rules ──→ Step Functions│
+│ Event rules ────→ SendEmailFn    │
+└───────┬──────────────────┬───────┘
+        │                  │
+        ▼                  ▼
+ Step Functions        SendEmailFn (fire-and-forget)
+   │                       │
+   ├─ register ────────────┤
+   ├─ send (per step) ─────┤
+   ├─ wait                  │
+   ├─ choice (branch)       │
+   ├─ condition ───→ CheckConditionFn
+   ├─ complete ────────────┤
+   │                       │
+   └───────────────────────┘
+                │
+        ┌───────┴───────┐
+        ▼               ▼
+   DynamoDB           S3 Templates
+   (state)            (HTML + Liquid)
+        │
+        ▼
+       SES ──→ Recipient
+        │
+        ├─ Bounce/Complaint ──→ SNS ──→ BounceHandlerFn
+        │                                  └─ suppress subscriber
+        │                                  └─ stop executions
+        │
+        ├─ Engagement ────────→ SNS ──→ EngagementHandlerFn
+        │  (open/click/delivery)           └─ write to Events table
+        │
+        └─ Unsubscribe link ──→ UnsubscribeFn (Function URL)
+                                   └─ mark unsubscribed
+                                   └─ stop executions`}</pre>
+      </div>
+
+      <Link
+        href="/docs/architecture"
+        className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground underline-offset-4 hover:underline"
+      >
+        Full architecture docs
+        <ArrowRight className="h-3.5 w-3.5" />
+      </Link>
     </section>
   );
 }
@@ -233,53 +423,55 @@ export default {
 function Features() {
   const features = [
     {
-      title: "AI generates sequences",
-      text: "Describe a sequence in plain language. Claude Code generates the TypeScript config, email templates, and deploy files.",
-    },
-    {
-      title: "16-tool MCP server",
-      text: "AI talks directly to your infrastructure. Manage subscribers, query engagement, preview templates, debug issues — all through Claude Code.",
-    },
-    {
-      title: "4 Claude Code skills",
-      text: "setup-env, create-sequence, validate, deploy. The skills handle generation, validation, CDK synthesis, and deployment.",
-    },
-    {
-      title: "AI-driven analytics",
-      text: "AI queries your engagement data and gives you recommendations. Opens, clicks, bounces per subscriber, template, or sequence.",
-    },
-    {
+      icon: Mail,
       title: "Full SES integration",
       text: "Delivery tracking, open/click events, bounce handling, List-Unsubscribe headers, HMAC-signed unsubscribe URLs.",
     },
     {
-      title: "Automatic suppression",
-      text: "Bounces and complaints suppress subscribers and stop all active Step Functions executions.",
-    },
-    {
-      title: "Serverless",
-      text: "Step Functions, Lambda, EventBridge, DynamoDB, S3. Pay-per-use on your own AWS account.",
-    },
-    {
+      icon: GitBranch,
       title: "Conditional branching",
-      text: "Branch on subscriber attributes, check if emails were sent, evaluate conditions within sequences.",
+      text: "Choice steps branch on subscriber attributes. Condition steps query DynamoDB at runtime for send history and profile changes.",
     },
     {
+      icon: Shield,
+      title: "Automatic suppression",
+      text: "Bounces and complaints suppress subscribers and stop all active Step Functions executions. No manual intervention.",
+    },
+    {
+      icon: Zap,
+      title: "Serverless & pay-per-use",
+      text: "Step Functions, Lambda, EventBridge, DynamoDB, S3. Pay-per-execution on your own AWS account. No fixed costs.",
+    },
+    {
+      icon: Database,
+      title: "Single-table DynamoDB",
+      text: "Subscribers, executions, send logs, and suppression records in one table. Engagement events in a second. No relational database.",
+    },
+    {
+      icon: TerminalIcon,
       title: "Template agnostic",
-      text: "React Email, MJML, raw HTML. Stores .html in S3 and renders LiquidJS at send time.",
+      text: "React Email, MJML, or raw HTML. Anything that produces .html. Rendered with LiquidJS at send time, cached in Lambda.",
     },
   ];
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-6">
-      <SectionHeader label="What's included" title="Framework, infrastructure, and tooling" />
-      <div className="mt-12 grid gap-x-12 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        {features.map((f) => (
-          <div key={f.title}>
-            <h3 className="text-sm font-semibold">{f.title}</h3>
-            <p className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground">{f.text}</p>
-          </div>
-        ))}
+    <section className="border-y border-fd-border/50 bg-fd-muted/20">
+      <div className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+        <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+          Built in
+        </p>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+          Everything you need for production email
+        </h2>
+        <div className="mt-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-3">
+          {features.map((f) => (
+            <div key={f.title} className="group">
+              <f.icon className="h-5 w-5 text-fd-muted-foreground/60 mb-3" strokeWidth={1.5} />
+              <h3 className="text-sm font-bold">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-fd-muted-foreground">{f.text}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -291,105 +483,64 @@ function MCPTools() {
   const groups = [
     {
       title: "Subscribers",
-      count: 6,
-      items: ["get", "list", "update", "delete", "unsubscribe", "resubscribe"],
+      tools: ["get", "list", "update", "delete", "unsubscribe", "resubscribe"],
     },
-    {
-      title: "Engagement",
-      count: 3,
-      items: ["by subscriber", "by template", "by sequence"],
-    },
-    {
-      title: "Templates",
-      count: 3,
-      items: ["list in S3", "preview with live data", "validate Liquid syntax"],
-    },
-    {
-      title: "Suppression",
-      count: 2,
-      items: ["list suppressed", "remove suppression"],
-    },
-    {
-      title: "System",
-      count: 2,
-      items: ["failed executions", "delivery stats"],
-    },
+    { title: "Engagement", tools: ["by subscriber", "by template", "by sequence"] },
+    { title: "Templates", tools: ["list", "preview with live data", "validate syntax"] },
+    { title: "Suppression", tools: ["list suppressed", "remove"] },
+    { title: "System", tools: ["failed executions", "delivery stats"] },
   ];
 
   return (
-    <section className="mx-auto w-full max-w-5xl px-6">
-      <SectionHeader
-        label="MCP Server"
-        title="16 tools for Claude Code"
-        description="The MCP server connects Claude Code to your running infrastructure. Manage subscribers, query analytics, preview emails, debug issues."
-      />
-      <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-        {groups.map((g) => (
-          <div key={g.title}>
-            <div className="mb-3 flex items-center gap-2">
-              <h4 className="text-sm font-semibold">{g.title}</h4>
-              <span className="rounded-full bg-fd-muted px-2 py-0.5 text-xs text-fd-muted-foreground">
-                {g.count}
-              </span>
-            </div>
-            <ul className="space-y-1">
-              {g.items.map((item) => (
-                <li key={item} className="flex items-center gap-2 text-sm text-fd-muted-foreground">
-                  <ChevronRight className="h-3 w-3 shrink-0 opacity-40" />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-        <div className="flex items-end">
+    <section className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+      <div className="grid items-start gap-12 lg:grid-cols-[1fr,1.5fr]">
+        <div>
+          <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+            MCP Server
+          </p>
+          <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+            18 tools for Claude&nbsp;Code
+          </h2>
+          <p className="mt-4 text-fd-muted-foreground leading-relaxed">
+            The MCP server connects Claude Code to your live AWS infrastructure. Manage subscribers,
+            query engagement metrics, preview emails with real data, debug delivery issues.
+          </p>
+          <p className="mt-3 text-fd-muted-foreground leading-relaxed">One command to set up:</p>
+          <code className="mt-2 block rounded-lg border border-fd-border bg-fd-card px-4 py-2.5 font-mono text-xs">
+            claude mcp add mailshot -- npx @mailshot/mcp
+          </code>
           <Link
             href="/docs/mcp-server"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-primary underline-offset-4 hover:underline"
+            className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground underline-offset-4 hover:underline"
           >
             Full tool reference
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
-      </div>
-    </section>
-  );
-}
 
-/* ── Architecture ────────────────────────────────────────── */
-
-function Architecture() {
-  const services = [
-    { name: "EventBridge", role: "Event routing" },
-    { name: "Step Functions", role: "Sequence orchestration" },
-    { name: "Lambda", role: "5 handler functions" },
-    { name: "DynamoDB", role: "Subscriber state + events" },
-    { name: "S3", role: "Template storage" },
-    { name: "SES", role: "Email delivery + tracking" },
-    { name: "SNS", role: "Bounce/engagement routing" },
-    { name: "SSM", role: "Runtime config" },
-  ];
-
-  return (
-    <section className="mx-auto w-full max-w-5xl px-6">
-      <SectionHeader
-        label="Architecture"
-        title="Managed AWS services, wired together"
-        description="EventBridge for routing, Step Functions for orchestration, Lambda for execution, DynamoDB for state, S3 for templates, SES for sending. CDK deploys the whole stack."
-      />
-      <div className="mt-12 grid grid-cols-2 gap-x-12 gap-y-6 sm:grid-cols-4">
-        {services.map((s) => (
-          <div key={s.name}>
-            <p className="text-sm font-semibold">{s.name}</p>
-            <p className="text-xs text-fd-muted-foreground">{s.role}</p>
-          </div>
-        ))}
-      </div>
-      <div className="mt-10 overflow-hidden rounded-xl bg-fd-muted/40 p-5 font-mono text-[13px] leading-relaxed">
-        <pre className="overflow-x-auto">{`Your App → EventBridge → Step Functions → Lambda → SES → Recipient
-                                            ↓
-                                    S3 (templates)
-                                    DynamoDB (state)`}</pre>
+        <div className="grid gap-4 sm:grid-cols-2">
+          {groups.map((g) => (
+            <div
+              key={g.title}
+              className="rounded-xl border border-fd-border/60 bg-fd-card/50 px-5 py-4"
+            >
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold">{g.title}</h4>
+                <span className="font-mono text-xs text-fd-muted-foreground">{g.tools.length}</span>
+              </div>
+              <div className="mt-2.5 flex flex-wrap gap-1.5">
+                {g.tools.map((t) => (
+                  <span
+                    key={t}
+                    className="rounded-md border border-fd-border/50 bg-fd-muted/40 px-2 py-0.5 font-mono text-[11px] text-fd-muted-foreground"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -400,26 +551,28 @@ function Architecture() {
 function Packages() {
   const pkgs = [
     { name: "@mailshot/shared", desc: "Types, constants, DynamoDB key helpers" },
-    { name: "@mailshot/handlers", desc: "Five Lambda handlers + shared lib modules" },
-    { name: "@mailshot/cdk", desc: "CDK infrastructure with modular constructs" },
+    { name: "@mailshot/handlers", desc: "Five Lambda handlers + shared lib" },
+    { name: "@mailshot/cdk", desc: "CDK infrastructure, modular constructs" },
     { name: "@mailshot/mcp", desc: "MCP server for Claude Code" },
     { name: "create-mailshot", desc: "CLI scaffolder" },
   ];
 
   return (
-    <section className="mx-auto w-full max-w-4xl px-6">
-      <SectionHeader label="Packages" title="Published to npm" />
-      <div className="mt-10 space-y-1">
-        {pkgs.map((p) => (
-          <div
-            key={p.name}
-            className="flex items-center gap-4 rounded-lg px-4 py-2.5 transition-colors hover:bg-fd-muted/40"
-          >
-            <code className="shrink-0 text-sm font-semibold">{p.name}</code>
-            <span className="hidden h-px flex-1 bg-fd-border/50 sm:block" />
-            <span className="text-sm text-fd-muted-foreground">{p.desc}</span>
-          </div>
-        ))}
+    <section className="border-t border-fd-border/50 bg-fd-muted/20">
+      <div className="mx-auto w-full max-w-4xl px-6 py-20 md:py-28">
+        <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+          Packages
+        </p>
+        <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">Published on npm</h2>
+        <div className="mt-10 divide-y divide-fd-border/50">
+          {pkgs.map((p) => (
+            <div key={p.name} className="flex items-baseline gap-4 py-3">
+              <code className="shrink-0 font-mono text-sm font-bold">{p.name}</code>
+              <span className="hidden h-px flex-1 bg-fd-border/30 sm:block translate-y-[-2px]" />
+              <span className="text-sm text-fd-muted-foreground">{p.desc}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -429,20 +582,20 @@ function Packages() {
 
 function CTA() {
   return (
-    <section className="mx-auto w-full max-w-4xl px-6 pb-24 md:pb-32">
+    <section className="mx-auto w-full max-w-4xl px-6 py-20 md:py-28">
       <div className="flex flex-col items-center gap-6 text-center">
-        <h2 className="text-balance text-3xl font-semibold tracking-tight md:text-4xl">
-          Describe a sequence. Deploy it.
+        <h2 className="text-balance text-3xl font-bold tracking-tight md:text-4xl">
+          Stop paying rent on your email sequences
         </h2>
-        <p className="max-w-md text-fd-muted-foreground">
-          Scaffold a project, open Claude Code, tell it what emails to send and when. AI generates
-          the config, templates, and deploys to your AWS account.
+        <p className="max-w-lg text-fd-muted-foreground leading-relaxed">
+          Own your infrastructure. Scaffold a project, define your sequences, deploy to AWS. Under
+          $5/month at 1,000 subscribers.
         </p>
         <div className="flex flex-col items-center gap-4 sm:flex-row">
           <Installer />
           <Link
             href="/docs/quickstart"
-            className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-muted-foreground underline-offset-4 hover:underline"
+            className="inline-flex items-center gap-1.5 text-sm font-medium text-fd-muted-foreground underline-offset-4 hover:text-fd-foreground hover:underline transition-colors"
           >
             Quickstart guide
             <ArrowRight className="h-3.5 w-3.5" />
@@ -453,58 +606,23 @@ function CTA() {
   );
 }
 
-/* ── Footer ─────────────────────────────────────────────── */
+/* ── Footer ──────────────────────────────────────────────── */
 
 function Footer() {
   return (
-    <footer className="border-t border-fd-border/50 py-8 text-center text-sm text-fd-muted-foreground">
-      <p>
-        Made with ❤️ and ☕ by{" "}
-        <a
-          href="https://github.com/mdwt"
-          className="font-medium text-fd-foreground underline-offset-4 hover:underline"
-        >
-          @mdwt
-        </a>
-      </p>
-      <p className="mt-1">Free and open source, forever.</p>
-    </footer>
-  );
-}
-
-/* ── Shared ──────────────────────────────────────────────── */
-
-function SectionHeader({
-  label,
-  title,
-  description,
-  align = "center",
-}: {
-  label: string;
-  title: string;
-  description?: string;
-  align?: "center" | "left";
-}) {
-  const centered = align === "center";
-  return (
-    <div className={centered ? "text-center" : ""}>
-      <p className="text-sm font-medium text-fd-muted-foreground">{label}</p>
-      <h2
-        className={`mt-2 text-balance text-2xl font-semibold tracking-tight sm:text-3xl md:text-4xl ${
-          centered ? "mx-auto max-w-3xl" : ""
-        }`}
-      >
-        {title}
-      </h2>
-      {description && (
-        <p
-          className={`mt-4 text-fd-muted-foreground sm:text-lg ${
-            centered ? "mx-auto max-w-2xl" : ""
-          }`}
-        >
-          {description}
+    <footer className="border-t border-fd-border/50 py-8">
+      <div className="mx-auto flex max-w-5xl flex-col items-center justify-between gap-4 px-6 text-sm text-fd-muted-foreground sm:flex-row">
+        <p>
+          Built by{" "}
+          <a
+            href="https://github.com/mdwt"
+            className="font-medium text-fd-foreground underline-offset-4 hover:underline"
+          >
+            @mdwt
+          </a>
         </p>
-      )}
-    </div>
+        <p>MIT licensed. Free forever.</p>
+      </div>
+    </footer>
   );
 }

@@ -13,9 +13,12 @@ export interface LambdasProps {
   table: dynamodb.Table;
   eventsTable: dynamodb.Table;
   templateBucket: s3.Bucket;
-  ssmPrefix: string;
   snsTopic: sns.Topic;
   sesConfigSetName: string;
+  defaultFromEmail: string;
+  defaultFromName: string;
+  replyToEmail?: string;
+  unsubscribeSecret: string;
   logLevel?: string;
   handlersPath?: string;
 }
@@ -47,16 +50,22 @@ export class LambdasConstruct extends Construct {
         "@aws-sdk/client-s3",
         "@aws-sdk/client-sesv2",
         "@aws-sdk/client-sfn",
-        "@aws-sdk/client-ssm",
         "@aws-sdk/util-dynamodb",
       ],
     };
 
     const commonEnv = {
       NODE_OPTIONS: "--enable-source-maps",
-      SSM_PREFIX: props.ssmPrefix,
       LOG_LEVEL: props.logLevel ?? "INFO",
       POWERTOOLS_LOG_DEDUPLICATION_DISABLED: "true",
+      TABLE_NAME: props.table.tableName,
+      EVENTS_TABLE_NAME: props.eventsTable.tableName,
+      TEMPLATE_BUCKET: props.templateBucket.bucketName,
+      DEFAULT_FROM_EMAIL: props.defaultFromEmail,
+      DEFAULT_FROM_NAME: props.defaultFromName,
+      REPLY_TO_EMAIL: props.replyToEmail ?? "",
+      SES_CONFIG_SET: props.sesConfigSetName,
+      UNSUBSCRIBE_SECRET: props.unsubscribeSecret,
     };
 
     // ── SendEmailFn ────────────────────────────────────────────────────
@@ -82,7 +91,6 @@ export class LambdasConstruct extends Construct {
         ],
       }),
     );
-    this.grantSsmRead(this.sendEmailFn, props.ssmPrefix);
 
     // ── CheckConditionFn ───────────────────────────────────────────────
     this.checkConditionFn = new nodejs.NodejsFunction(this, "CheckConditionFn", {
@@ -96,7 +104,6 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadData(this.checkConditionFn);
-    this.grantSsmRead(this.checkConditionFn, props.ssmPrefix);
 
     // ── UnsubscribeFn ──────────────────────────────────────────────────
     this.unsubscribeFn = new nodejs.NodejsFunction(this, "UnsubscribeFn", {
@@ -117,12 +124,15 @@ export class LambdasConstruct extends Construct {
         resources: ["*"],
       }),
     );
-    this.grantSsmRead(this.unsubscribeFn, props.ssmPrefix);
 
     const fnUrl = this.unsubscribeFn.addFunctionUrl({
       authType: lambda.FunctionUrlAuthType.NONE,
     });
     this.unsubscribeFnUrl = fnUrl.url;
+
+    // Set UNSUBSCRIBE_BASE_URL after the function URL is created
+    this.sendEmailFn.addEnvironment("UNSUBSCRIBE_BASE_URL", fnUrl.url);
+    this.unsubscribeFn.addEnvironment("UNSUBSCRIBE_BASE_URL", fnUrl.url);
 
     // ── BounceHandlerFn ────────────────────────────────────────────────
     this.bounceHandlerFn = new nodejs.NodejsFunction(this, "BounceHandlerFn", {
@@ -143,7 +153,6 @@ export class LambdasConstruct extends Construct {
         resources: ["*"],
       }),
     );
-    this.grantSsmRead(this.bounceHandlerFn, props.ssmPrefix);
 
     // Subscribe to SES notifications
     props.snsTopic.addSubscription(new snsSubscriptions.LambdaSubscription(this.bounceHandlerFn));
@@ -160,24 +169,5 @@ export class LambdasConstruct extends Construct {
     });
 
     props.eventsTable.grantWriteData(this.engagementHandlerFn);
-    this.grantSsmRead(this.engagementHandlerFn, props.ssmPrefix);
-  }
-
-  private grantSsmRead(fn: lambda.Function, prefix: string): void {
-    fn.addToRolePolicy(
-      new iam.PolicyStatement({
-        actions: ["ssm:GetParameter"],
-        resources: [
-          cdk.Arn.format(
-            {
-              service: "ssm",
-              resource: "parameter",
-              resourceName: `${prefix.replace(/^\//, "")}/*`,
-            },
-            cdk.Stack.of(this),
-          ),
-        ],
-      }),
-    );
   }
 }

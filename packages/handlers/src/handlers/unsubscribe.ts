@@ -1,5 +1,5 @@
 import type { APIGatewayProxyResultV2 } from "aws-lambda";
-import { resolveConfig } from "../lib/ssm-config.js";
+import { resolveConfig } from "../lib/config.js";
 import { validateToken } from "../lib/unsubscribe-token.js";
 import { setProfileFlag } from "../lib/dynamo-client.js";
 import { stopAllExecutions } from "../lib/execution-stopper.js";
@@ -36,7 +36,7 @@ export const handler = async (event: {
     };
   }
 
-  const config = await resolveConfig();
+  const config = resolveConfig();
   const result = validateToken(token, config.unsubscribeSecret);
 
   if (!result.valid) {

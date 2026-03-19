@@ -4,7 +4,7 @@ const mockResolveConfig = vi.fn();
 const mockGetSubscriberProfile = vi.fn();
 const mockHasBeenSent = vi.fn();
 
-vi.mock("../../lib/ssm-config.js", () => ({
+vi.mock("../../lib/config.js", () => ({
   resolveConfig: () => mockResolveConfig(),
 }));
 
@@ -18,7 +18,7 @@ const { handler } = await import("../check-condition.js");
 const CONFIG = { tableName: "TestTable" };
 
 beforeEach(() => {
-  mockResolveConfig.mockReset().mockResolvedValue(CONFIG);
+  mockResolveConfig.mockReset().mockReturnValue(CONFIG);
   mockGetSubscriberProfile.mockReset();
   mockHasBeenSent.mockReset();
 });

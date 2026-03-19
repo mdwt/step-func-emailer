@@ -1,5 +1,5 @@
 import type { CheckConditionInput, CheckConditionOutput } from "@mailshot/shared";
-import { resolveConfig } from "../lib/ssm-config.js";
+import { resolveConfig } from "../lib/config.js";
 import { getSubscriberProfile, hasBeenSent } from "../lib/dynamo-client.js";
 import { createLogger } from "../lib/logger.js";
 
@@ -14,7 +14,7 @@ export const handler = async (event: CheckConditionInput): Promise<CheckConditio
     templateKey: event.templateKey,
   });
 
-  const config = await resolveConfig();
+  const config = resolveConfig();
 
   switch (event.check) {
     case "subscriber_field_exists": {

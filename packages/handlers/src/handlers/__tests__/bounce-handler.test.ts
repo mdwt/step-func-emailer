@@ -7,7 +7,7 @@ const mockSetProfileFlag = vi.fn();
 const mockStopAllExecutions = vi.fn();
 const mockAddToSuppressionList = vi.fn();
 
-vi.mock("../../lib/ssm-config.js", () => ({
+vi.mock("../../lib/config.js", () => ({
   resolveConfig: () => mockResolveConfig(),
 }));
 
@@ -39,7 +39,7 @@ function snsEvent(message: unknown): SNSEvent {
 }
 
 beforeEach(() => {
-  mockResolveConfig.mockReset().mockResolvedValue(CONFIG);
+  mockResolveConfig.mockReset().mockReturnValue(CONFIG);
   mockWriteSuppression.mockReset().mockResolvedValue(undefined);
   mockSetProfileFlag.mockReset().mockResolvedValue(undefined);
   mockStopAllExecutions.mockReset().mockResolvedValue(undefined);

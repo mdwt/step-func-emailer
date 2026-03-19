@@ -124,18 +124,6 @@ export interface UnsubscribeTokenPayload {
   expiryTimestamp: string;
 }
 
-// ── SSM parameter paths ─────────────────────────────────────────────────────
-
-export interface SsmParameterPaths {
-  tableName: string;
-  templateBucket: string;
-  defaultFromEmail: string;
-  defaultFromName: string;
-  sesConfigSet: string;
-  unsubscribeBaseUrl: string;
-  unsubscribeSecret: string;
-}
-
 // ── Email event (engagement tracking) ────────────────────────────────────────
 
 export type EmailEventType = "delivery" | "open" | "click" | "bounce" | "complaint";
@@ -239,5 +227,4 @@ export interface MailshotConfig {
   defaultFromName: string;
   replyToEmail?: string;
   unsubscribeSecret: string;
-  ssmPrefix: string;
 }
