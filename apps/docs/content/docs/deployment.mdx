@@ -62,7 +62,7 @@ Build order matters — `shared` must build first:
 ```bash
 pnpm install
 pnpm --filter @mailshot/shared build    # Types and constants
-pnpm --filter @mailshot/<sequenceId> build  # Templates (per sequence)
+pnpm --filter <sequenceId> build  # Templates (per sequence)
 pnpm --filter @mailshot/cdk build        # CDK infrastructure
 ```
 

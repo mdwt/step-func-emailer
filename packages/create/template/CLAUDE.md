@@ -23,9 +23,9 @@ pnpm run cdk:deploy           # CDK deploy to AWS (loads .env automatically)
 Single sequence:
 
 ```bash
-pnpm --filter @mailshot/<sequenceId> build      # Build one sequence
-pnpm --filter @mailshot/<sequenceId> dev        # React Email dev server (if using React Email)
-pnpm --filter @mailshot/<sequenceId> typecheck  # Typecheck one sequence
+pnpm --filter <sequenceId> build      # Build one sequence
+pnpm --filter <sequenceId> dev        # React Email dev server (if using React Email)
+pnpm --filter <sequenceId> typecheck  # Typecheck one sequence
 ```
 
 ## Project structure
@@ -65,11 +65,25 @@ Events: fire-and-forget emails triggered by EventBridge events during a running 
 
 See `@mailshot/shared` for the full `SequenceDefinition` type.
 
+## Renaming a sequence
+
+The sequence `id` in `sequence.config.ts` is the single source of truth. The render script and templateKeys derive from it automatically (via the `id` variable). The folder name is independent — it's just where you keep your code.
+
+To rename a sequence (e.g., if the ID conflicts with an existing AWS resource):
+
+1. **Update `sequence.config.ts`**: change the `id` variable to the new name
+2. **Update `package.json`**: change `name` to `<newId>`
+3. **Optionally rename the directory** to match (not required, but keeps things tidy)
+4. **Clean and rebuild**: `rm -rf build/<oldId> && pnpm build`
+5. **Verify**: `pnpm synth`
+
+Do NOT rename individual template `.tsx` files — only the sequence ID changes.
+
 ## Key conventions
 
 - All packages use CommonJS with Node16 module resolution
 - TypeScript strict mode, target ES2022, Node 22 runtime
-- Sequence packages use `@mailshot/<sequenceId>` naming and `workspace:*` for shared deps
+- Sequence packages use `<sequenceId>` as the package name (no namespace) and `workspace:*` for shared deps
 - The CDK stack reads all config from `.env` — no hardcoded values in `bin/app.ts`
 - `pnpm synth` and `pnpm run cdk:deploy` load `.env` automatically via `dotenv-cli` — never run `npx cdk` directly
 - IMPORTANT: `pnpm deploy` is a built-in pnpm command (not a script) and will fail. Use `pnpm run cdk:deploy` for raw CDK deploy, or better yet, use the `/deploy` skill which validates, builds, and confirms first

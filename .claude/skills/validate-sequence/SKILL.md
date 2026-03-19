@@ -79,7 +79,7 @@ Report the full list of templateKeys found.
 For each templateKey, check that `build/<sequenceId>/templates/<templateKey>.html` exists. Report any missing templates. If templates are missing, suggest building the sequence first:
 
 ```
-pnpm --filter @mailshot/<sequenceId> build
+pnpm --filter <sequenceId> build
 ```
 
 ### Step 6: Typecheck

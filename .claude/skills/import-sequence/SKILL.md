@@ -53,7 +53,7 @@ Create the following files:
 
 ```json
 {
-  "name": "@mailshot/<sequenceId>",
+  "name": "<sequenceId>",
   "version": "0.0.0",
   "private": true,
   "type": "commonjs",
@@ -168,7 +168,7 @@ pnpm install
 Run:
 
 ```bash
-pnpm --filter @mailshot/<sequenceId> build
+pnpm --filter <sequenceId> build
 ```
 
 If the build succeeds, run `/validate-sequence <sequenceId>` to confirm the imported sequence passes all checks.

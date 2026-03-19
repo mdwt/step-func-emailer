@@ -34,7 +34,7 @@ This must succeed first since all other packages depend on it.
 For each sequence in `sequences/*/`, run:
 
 ```bash
-pnpm --filter @mailshot/<sequenceId> build
+pnpm --filter <sequenceId> build
 ```
 
 This compiles TypeScript and renders React Email templates to `build/<sequenceId>/templates/*.html`. Report any build failures with the full error output.

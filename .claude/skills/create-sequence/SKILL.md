@@ -45,7 +45,7 @@ Create `sequences/<sequenceId>/` with the following files. Pay attention to exac
 
 ```json
 {
-  "name": "@mailshot/<sequenceId>",
+  "name": "<sequenceId>",
   "version": "0.0.0",
   "private": true,
   "type": "commonjs",
@@ -99,8 +99,10 @@ The config must satisfy the `SequenceDefinition` type from `@mailshot/shared`. H
 ```typescript
 import type { SequenceDefinition } from "@mailshot/shared";
 
+const id = "<sequenceId>";
+
 export default {
-  id: "<sequenceId>",
+  id,
   trigger: {
     detailType: "<triggerEvent>",
     subscriberMapping: {
@@ -117,7 +119,7 @@ export default {
   events: [
     {
       detailType: "customer.first_sale",
-      templateKey: "<sequenceId>/first-sale",
+      templateKey: `${id}/first-sale`,
       subject: "Congrats!",
     },
   ],
@@ -129,7 +131,7 @@ export default {
 **Send** — sends an email via the SendEmailFn Lambda:
 
 ```typescript
-{ type: "send", templateKey: "<sequenceId>/<templateName>", subject: "..." }
+{ type: "send", templateKey: `${id}/<templateName>`, subject: "..." }
 ```
 
 **Wait** — pauses the Step Function execution:
@@ -162,7 +164,7 @@ Choices can be nested (e.g., branch on platform, then on country within each pla
 {
   type: "condition",
   check: "has_been_sent",
-  templateKey: "<sequenceId>/<templateName>",
+  templateKey: `${id}/<templateName>`,
   then: [],  // skip
   else: [{ type: "send", templateKey: "...", subject: "..." }],
 }
@@ -189,19 +191,21 @@ If using React Email:
 
 ### Step 5: Create render script
 
-Create `sequences/<sequenceId>/src/render.ts`. The `OUT_DIR` MUST use `__dirname` to resolve relative to the file, not `process.cwd()` (which changes depending on how the script is invoked):
+Create `sequences/<sequenceId>/src/render.ts`. The `OUT_DIR` MUST be derived from the sequence config's `id` field — never hardcode the sequence ID in the path. Use `__dirname` to resolve relative to the file, not `process.cwd()`:
 
 ```typescript
-const OUT_DIR = path.join(__dirname, "../../../build/<sequenceId>/templates");
+import config from "../sequence.config.js";
+
+const OUT_DIR = path.join(__dirname, `../../../build/${config.id}/templates`);
 ```
 
-This resolves to `build/<sequenceId>/templates/` at the project root regardless of working directory.
+This ensures renaming a sequence only requires changing the `id` in `sequence.config.ts` — the render script picks it up automatically.
 
 ### Step 6: Install and verify
 
 ```bash
 pnpm install
-pnpm --filter @mailshot/<sequenceId> build
+pnpm --filter <sequenceId> build
 pnpm --filter @mailshot/cdk typecheck
 pnpm --filter @mailshot/cdk synth
 ```
