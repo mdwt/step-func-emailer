@@ -1,5 +1,11 @@
 # @mailshot/shared
 
+## 1.0.3
+
+### Patch Changes
+
+- [`65a90d2`](https://github.com/mdwt/mailshot/commit/65a90d2a38dab4e76cebe466c54d7e453b20a37a) Thanks [@mdwt](https://github.com/mdwt)! - Remove SSM parameter dependency and fix post-setup guidance to show correct workflow
+
 ## 1.0.0
 
 ### Major Changes
