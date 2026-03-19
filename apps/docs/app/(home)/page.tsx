@@ -17,6 +17,7 @@ export default function HomePage() {
       <Hero />
       <Problem />
       <SequenceCode />
+      <Templates />
       <HowItWorks />
       <ArchitectureDiagram />
       <Features />
@@ -288,6 +289,78 @@ function SequenceCode() {
   );
 }
 
+/* ── Templates ──────────────────────────────────────────── */
+
+function Templates() {
+  const sources = [
+    { name: "React Email", desc: "Component-based templates with TypeScript" },
+    { name: "Maizzle", desc: "Tailwind CSS for HTML emails" },
+    { name: "MJML", desc: "Responsive email markup language" },
+    { name: "Raw HTML", desc: "Hand-written or exported from any tool" },
+    { name: "Existing templates", desc: "Drop in .html files you already have" },
+  ];
+
+  return (
+    <section className="border-y border-fd-border/50 bg-fd-muted/20">
+      <div className="mx-auto w-full max-w-5xl px-6 py-20 md:py-28">
+        <div className="grid items-start gap-12 lg:grid-cols-[1fr,1fr]">
+          <div>
+            <p className="font-mono text-xs font-medium tracking-widest text-fd-muted-foreground uppercase">
+              Templates
+            </p>
+            <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
+              Bring your own templates
+            </h2>
+            <p className="mt-4 text-fd-muted-foreground leading-relaxed">
+              Use whatever produces HTML. React Email, Maizzle, MJML, a drag-and-drop builder, or
+              templates you already have. Create new ones with AI or import existing ones — it
+              doesn{"'"}t matter where they come from.
+            </p>
+            <p className="mt-3 text-fd-muted-foreground leading-relaxed">
+              The only constant is{" "}
+              <a
+                href="https://liquidjs.com/"
+                className="font-medium text-fd-foreground underline-offset-4 hover:underline"
+              >
+                LiquidJS
+              </a>{" "}
+              for runtime variables. Your{" "}
+              <code className="rounded border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-xs">
+                .html
+              </code>{" "}
+              goes to S3, and Liquid placeholders like{" "}
+              <code className="rounded border border-fd-border bg-fd-muted/60 px-1.5 py-0.5 font-mono text-xs">
+                {"{{ firstName }}"}
+              </code>{" "}
+              are rendered at send time with live subscriber data.
+            </p>
+            <Link
+              href="/docs/templates"
+              className="mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-fd-foreground underline-offset-4 hover:underline"
+            >
+              Template docs
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+
+          <div className="space-y-3">
+            {sources.map((s) => (
+              <div
+                key={s.name}
+                className="flex items-baseline gap-4 rounded-lg border border-fd-border/50 bg-fd-card/50 px-5 py-3"
+              >
+                <code className="shrink-0 font-mono text-sm font-bold">{s.name}</code>
+                <span className="hidden h-px flex-1 bg-fd-border/30 sm:block translate-y-[-2px]" />
+                <span className="text-sm text-fd-muted-foreground">{s.desc}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 /* ── How it works ────────────────────────────────────────── */
 
 function HowItWorks() {
@@ -448,8 +521,8 @@ function Features() {
     },
     {
       icon: TerminalIcon,
-      title: "Template agnostic",
-      text: "React Email, MJML, or raw HTML. Anything that produces .html. Rendered with LiquidJS at send time, cached in Lambda.",
+      title: "Any template source",
+      text: "Bring existing templates or generate new ones with AI. Anything that produces .html works. LiquidJS renders variables at send time.",
     },
   ];
 
