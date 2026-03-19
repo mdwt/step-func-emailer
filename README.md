@@ -1,6 +1,5 @@
 <div align="center"><img width="800"  alt="mailshot banner" src="https://github.com/user-attachments/assets/cc20b75f-68b0-49d7-a3e5-43f187e9244b" />
 
-
   <p align="center">
     <img src="https://img.shields.io/badge/AWS-Step%20Functions-FF9900?logo=amazonaws&logoColor=white&style=for-the-badge" />
     <img src="https://img.shields.io/badge/AWS-SES-FF9900?logo=amazonaws&logoColor=white&style=for-the-badge" />
@@ -8,7 +7,7 @@
     <img src="https://img.shields.io/badge/Claude-MCP-D97757?logo=anthropic&logoColor=white&style=for-the-badge" />
   </p>
 
-<strong>Open-source email sequences on AWS, managed entirely through Claude Code. [mailshot.dev](https://mailshot.dev/)</strong>
+<strong>Open-source serverless email sequences on AWS, managed entirely through Claude Code. [mailshot.dev](https://mailshot.dev/)</strong>
 
 </div>
 

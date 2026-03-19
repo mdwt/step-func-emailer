@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 1.0.2
+
+### Patch Changes
+
+- Add frontmatter descriptions to all skills for reliable auto-triggering
+
 ## 1.0.0
 
 ### Major Changes
