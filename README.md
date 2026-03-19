@@ -73,7 +73,7 @@ Your App → EventBridge → Step Functions → Lambda → SES → Recipient
 
 ## Sequences as code
 
-Sequences are TypeScript config files. A typed definition you can read, diff, and review.
+Describe the sequence you want and Claude Code generates the full config — triggers, steps, delays, branches, and email templates. The output is a structured definition you can read, diff, and review.
 
 ```typescript
 import type { SequenceDefinition } from "@mailshot/shared";
