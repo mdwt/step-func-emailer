@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 1.0.4
+
+### Patch Changes
+
+- [`4279a60`](https://github.com/mdwt/mailshot/commit/4279a600302e6013896b0db3833b244c340befd9) Thanks [@mdwt](https://github.com/mdwt)! - Fix deploy workflow to avoid pnpm built-in deploy command collision
+
 ## 1.0.3
 
 ### Patch Changes
