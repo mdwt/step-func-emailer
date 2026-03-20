@@ -57,6 +57,7 @@ export class MailshotStack extends cdk.Stack {
 
     // ── State machines ───────────────────────────────────────────────────
     const stateMachines = new StateMachinesConstruct(this, "StateMachines", {
+      stackName: config.stackName,
       sendEmailFn: lambdas.sendEmailFn,
       checkConditionFn: lambdas.checkConditionFn,
       sequences: definitions,
@@ -95,10 +96,13 @@ export class MailshotStack extends cdk.Stack {
     // dependency between StateMachine → Lambda → StateMachine via EventBridge
     const smArns = definitions.map((d) => {
       const name =
+        config.stackName +
+        "-" +
         d.id
           .split(/[-_]/)
           .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-          .join("") + "Sequence";
+          .join("") +
+        "Sequence";
       return this.formatArn({
         service: "states",
         resource: "stateMachine",

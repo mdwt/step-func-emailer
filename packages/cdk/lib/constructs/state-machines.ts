@@ -13,6 +13,7 @@ import type {
 } from "@mailshot/shared";
 
 export interface StateMachinesProps {
+  stackName: string;
   sendEmailFn: lambda.IFunction;
   checkConditionFn: lambda.IFunction;
   sequences: SequenceDefinition[];
@@ -41,7 +42,12 @@ export class StateMachinesConstruct extends Construct {
     this.stateMachines = new Map();
 
     for (const seq of props.sequences) {
-      const sm = this.buildSequence(seq, props.sendEmailFn, props.checkConditionFn);
+      const sm = this.buildSequence(
+        seq,
+        props.sendEmailFn,
+        props.checkConditionFn,
+        props.stackName,
+      );
       this.stateMachines.set(seq.id, sm);
     }
   }
@@ -50,6 +56,7 @@ export class StateMachinesConstruct extends Construct {
     def: SequenceDefinition,
     sendEmailFn: lambda.IFunction,
     checkConditionFn: lambda.IFunction,
+    stackName: string,
   ): sfn.StateMachine {
     const prefix = pascalCase(def.id);
 
@@ -100,7 +107,7 @@ export class StateMachinesConstruct extends Construct {
     }
 
     return new sfn.StateMachine(this, `${prefix}Sequence`, {
-      stateMachineName: `${prefix}Sequence`,
+      stateMachineName: `${stackName}-${prefix}Sequence`,
       definitionBody: sfn.DefinitionBody.fromChainable(definition),
       timeout: cdk.Duration.minutes(def.timeoutMinutes),
     });
