@@ -1,5 +1,11 @@
 # @mailshot/cdk
 
+## 1.2.1
+
+### Patch Changes
+
+- [`97bb69f`](https://github.com/mdwt/mailshot/commit/97bb69ffb17ba9883ee375a5f6b0cfa864cac1e9) Thanks [@mdwt](https://github.com/mdwt)! - Fix state machine name collisions by prefixing with stackName
+
 ## 1.2.0
 
 ### Minor Changes
