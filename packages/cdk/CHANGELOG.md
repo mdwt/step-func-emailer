@@ -1,5 +1,17 @@
 # @mailshot/cdk
 
+## 1.2.0
+
+### Minor Changes
+
+- [#4](https://github.com/mdwt/mailshot/pull/4) [`b85c746`](https://github.com/mdwt/mailshot/commit/b85c746ad65474200d351e06ada3368b6df5f220) Thanks [@mdwt](https://github.com/mdwt)! - Add sequence exit events to remove subscribers from sequences on specific EventBridge events
+
+### Patch Changes
+
+- Updated dependencies [[`b85c746`](https://github.com/mdwt/mailshot/commit/b85c746ad65474200d351e06ada3368b6df5f220)]:
+  - @mailshot/shared@1.2.0
+  - @mailshot/handlers@1.2.0
+
 ## 1.0.3
 
 ### Patch Changes

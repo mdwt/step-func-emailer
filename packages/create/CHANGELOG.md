@@ -1,5 +1,11 @@
 # create-mailshot
 
+## 1.2.0
+
+### Patch Changes
+
+- Update scaffolded dependency versions from ^0.2.0 to ^1.0.0 for @mailshot/cdk and @mailshot/shared
+
 ## 1.1.0
 
 ### Minor Changes

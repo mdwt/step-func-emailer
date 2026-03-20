@@ -1,6 +1,6 @@
 {
   "name": "@mailshot/cdk",
-  "version": "1.0.3",
+  "version": "1.2.0",
   "description": "AWS CDK constructs for mailshot",
   "license": "MIT",
   "type": "commonjs",
