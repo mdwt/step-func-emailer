@@ -21,6 +21,10 @@ export class MailshotStack extends cdk.Stack {
 
     const { config, definitions } = props;
 
+    // ── Tags (applied to all resources in the stack) ─────────────────────
+    cdk.Tags.of(this).add("application", "mailshot");
+    cdk.Tags.of(this).add("stack", config.stackName);
+
     // ── Storage (DynamoDB + S3) ──────────────────────────────────────────
     const storage = new StorageConstruct(this, "Storage", {
       tableName: config.tableName,
