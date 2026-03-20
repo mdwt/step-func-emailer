@@ -117,16 +117,18 @@ function Terminal() {
         <span className="ml-2 font-mono text-[11px] text-fd-muted-foreground/60">~/my-project</span>
       </div>
       <div className="p-5 font-mono text-[13px] leading-[1.7] text-left">
-        <TLine prompt>npx create-mailshot my-project &amp;&amp; cd my-project</TLine>
+        <TLine prompt>npx create-mailshot my-mailers &amp;&amp; cd my-mailers</TLine>
         <TLine prompt>claude</TLine>
         <TLine />
-        <TLine dim>&gt; Set up my environment for us-east-1</TLine>
+        <TLine dim>&gt; Set up my environment for prod profile </TLine>
         <TLine ok>✓ .env configured, SSM parameters verified, SES identity confirmed</TLine>
         <TLine />
-        <TLine dim>&gt; Create a 5-email onboarding sequence triggered by customer.created</TLine>
+        <TLine dim>
+          &gt; Create a 5-email onboarding sequence triggered by customer.created. Use react email
+        </TLine>
         <TLine ok>✓ Generated sequence config, 5 templates, render script</TLine>
         <TLine />
-        <TLine dim>&gt; Validate and deploy</TLine>
+        <TLine dim>&gt; Validate and deploy onboarding</TLine>
         <TLine ok>✓ Types valid, templates matched, CDK deployed to us-east-1</TLine>
         <TLine />
         <TLine dim>&gt; What are the open rates on the onboarding sequence?</TLine>
@@ -142,7 +144,7 @@ function TLine({
   dim,
   ok,
 }: {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   prompt?: boolean;
   dim?: boolean;
   ok?: boolean;
@@ -158,7 +160,7 @@ function TLine({
       }
     >
       {prompt && <span className="text-fd-muted-foreground/50">$ </span>}
-      {children}
+      {children ?? "\u00A0"}
     </p>
   );
 }
