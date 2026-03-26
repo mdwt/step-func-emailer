@@ -13,6 +13,7 @@ import {
 import type {
   SequenceDefinition,
   SequenceStep,
+  SenderConfig,
   SubscriberMapping,
   EventEmail,
 } from "@mailshot/shared";
@@ -374,6 +375,19 @@ export async function exportSequence(
   const firstStepName = registerState?.Next;
   const steps = parseSteps(asl.States, firstStepName, prefix);
 
+  // 3b. Extract sender config from the first send step's Parameters
+  let sender: SenderConfig = { fromEmail: "", fromName: "" };
+  for (const [, state] of Object.entries(asl.States as Record<string, Record<string, unknown>>)) {
+    const params = state.Parameters as Record<string, unknown> | undefined;
+    if (params?.action === "send" && params?.sender) {
+      sender = params.sender as SenderConfig;
+      break;
+    }
+  }
+  if (!sender.fromEmail) {
+    warnings.push("Could not extract sender config from state machine. Add sender manually.");
+  }
+
   // 4. Get trigger config from EventBridge
   let detailType = `${sequenceId}.trigger`;
   let subscriberMapping: SubscriberMapping = {
@@ -553,6 +567,7 @@ export async function exportSequence(
   // 7. Build the definition
   const definition: SequenceDefinition = {
     id: sequenceId,
+    sender,
     trigger: {
       detailType,
       subscriberMapping,

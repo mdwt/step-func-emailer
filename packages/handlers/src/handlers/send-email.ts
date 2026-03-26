@@ -42,6 +42,7 @@ export const handler = async (
           templateKey: event.templateKey,
           subject: event.subject,
           subscriber: event.subscriber,
+          sender: event.sender,
         },
         config,
         "fire_and_forget",
@@ -172,9 +173,13 @@ async function handleSend(
     context as Parameters<typeof renderTemplate>[2],
   );
 
-  const fromAddress = config.defaultFromName
-    ? `${config.defaultFromName} <${config.defaultFromEmail}>`
-    : config.defaultFromEmail;
+  const sender = event.sender;
+  if (!sender?.fromEmail) {
+    throw new Error("Missing sender.fromEmail in event payload");
+  }
+  const fromAddress = sender.fromName
+    ? `${sender.fromName} <${sender.fromEmail}>`
+    : sender.fromEmail;
 
   const messageId = await sendEmail({
     from: fromAddress,
@@ -183,17 +188,22 @@ async function handleSend(
     htmlBody,
     configurationSetName: config.sesConfigSet,
     unsubscribeUrl,
-    replyToAddress: config.replyToEmail || undefined,
+    replyToAddress: sender.replyToEmail || undefined,
     templateKey: event.templateKey,
     sequenceId,
   });
 
-  await writeSendLog(config.tableName, event.subscriber.email, {
-    templateKey: event.templateKey,
-    sequenceId,
-    subject: event.subject,
-    sesMessageId: messageId,
-  });
+  await writeSendLog(
+    config.tableName,
+    event.subscriber.email,
+    {
+      templateKey: event.templateKey,
+      sequenceId,
+      subject: event.subject,
+      sesMessageId: messageId,
+    },
+    config.dataTtlDays,
+  );
 
   logger.info("Send complete", {
     email: event.subscriber.email,

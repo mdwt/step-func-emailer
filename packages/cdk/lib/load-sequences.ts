@@ -40,6 +40,15 @@ export function loadSequenceConfigs(sequencesDir?: string): SequenceDefinition[]
     if (!def.timeoutMinutes) {
       throw new Error(`${configPath}: missing 'timeoutMinutes'`);
     }
+    if (!def.sender?.fromEmail) {
+      throw new Error(`${configPath}: missing 'sender.fromEmail'`);
+    }
+    if (!def.sender?.fromName) {
+      throw new Error(`${configPath}: missing 'sender.fromName'`);
+    }
+    if (def.sender?.captureReplies && !def.sender?.replyToEmail) {
+      throw new Error(`${configPath}: 'sender.captureReplies' requires 'sender.replyToEmail'`);
+    }
 
     definitions.push(def);
   }

@@ -31,10 +31,13 @@
     "@aws-sdk/client-sesv2": "^3.1009.0",
     "@aws-sdk/client-sfn": "^3.1009.0",
     "@aws-sdk/util-dynamodb": "^3.996.2",
+    "@aws-sdk/client-eventbridge": "^3.1009.0",
     "@mailshot/shared": "workspace:*",
-    "liquidjs": "^10.25.0"
+    "liquidjs": "^10.25.0",
+    "mailparser": "^3.7.2"
   },
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.161"
+    "@types/aws-lambda": "^8.10.161",
+    "@types/mailparser": "^3.4.5"
   }
 }

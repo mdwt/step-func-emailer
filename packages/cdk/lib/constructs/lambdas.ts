@@ -14,11 +14,11 @@ export interface LambdasProps {
   eventsTable: dynamodb.Table;
   templateBucket: s3.Bucket;
   snsTopic: sns.Topic;
+  replyTopic?: sns.Topic;
   sesConfigSetName: string;
-  defaultFromEmail: string;
-  defaultFromName: string;
-  replyToEmail?: string;
   unsubscribeSecret: string;
+  eventBusName?: string;
+  dataTtlDays?: number;
   logLevel?: string;
   handlersPath?: string;
 }
@@ -30,6 +30,7 @@ export class LambdasConstruct extends Construct {
   public readonly bounceHandlerFn: nodejs.NodejsFunction;
   public readonly engagementHandlerFn: nodejs.NodejsFunction;
   public readonly sequenceExitFn: nodejs.NodejsFunction;
+  public readonly replyHandlerFn?: nodejs.NodejsFunction;
   public readonly unsubscribeFnUrl: string;
 
   constructor(scope: Construct, id: string, props: LambdasProps) {
@@ -48,6 +49,7 @@ export class LambdasConstruct extends Construct {
       format: nodejs.OutputFormat.CJS,
       externalModules: [
         "@aws-sdk/client-dynamodb",
+        "@aws-sdk/client-eventbridge",
         "@aws-sdk/client-s3",
         "@aws-sdk/client-sesv2",
         "@aws-sdk/client-sfn",
@@ -62,11 +64,10 @@ export class LambdasConstruct extends Construct {
       TABLE_NAME: props.table.tableName,
       EVENTS_TABLE_NAME: props.eventsTable.tableName,
       TEMPLATE_BUCKET: props.templateBucket.bucketName,
-      DEFAULT_FROM_EMAIL: props.defaultFromEmail,
-      DEFAULT_FROM_NAME: props.defaultFromName,
-      REPLY_TO_EMAIL: props.replyToEmail ?? "",
       SES_CONFIG_SET: props.sesConfigSetName,
       UNSUBSCRIBE_SECRET: props.unsubscribeSecret,
+      EVENT_BUS_NAME: props.eventBusName ?? "",
+      ...(props.dataTtlDays !== undefined ? { DATA_TTL_DAYS: String(props.dataTtlDays) } : {}),
     };
 
     // ── SendEmailFn ────────────────────────────────────────────────────
@@ -182,5 +183,36 @@ export class LambdasConstruct extends Construct {
     });
 
     props.table.grantReadWriteData(this.sequenceExitFn);
+
+    // ── ReplyHandlerFn (opt-in, requires replyTopic) ─────────────────
+    if (props.replyTopic) {
+      this.replyHandlerFn = new nodejs.NodejsFunction(this, "ReplyHandlerFn", {
+        entry: path.join(handlersPath, "handlers/reply-handler.ts"),
+        handler: "handler",
+        runtime: lambda.Runtime.NODEJS_22_X,
+        memorySize: 256,
+        timeout: cdk.Duration.seconds(30),
+        environment: commonEnv,
+        bundling: commonBundling,
+      });
+
+      props.table.grantReadData(this.replyHandlerFn);
+      props.eventsTable.grantWriteData(this.replyHandlerFn);
+
+      if (props.eventBusName) {
+        this.replyHandlerFn.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["events:PutEvents"],
+            resources: [
+              `arn:aws:events:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:event-bus/${props.eventBusName}`,
+            ],
+          }),
+        );
+      }
+
+      props.replyTopic.addSubscription(
+        new snsSubscriptions.LambdaSubscription(this.replyHandlerFn),
+      );
+    }
   }
 }

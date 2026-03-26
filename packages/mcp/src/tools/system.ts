@@ -74,6 +74,7 @@ export async function getDeliveryStats(config: McpConfig, startDate: string, end
     click: 0,
     bounce: 0,
     complaint: 0,
+    reply: 0,
   };
 
   for (const item of items) {

@@ -73,8 +73,7 @@ Every Lambda function follows least-privilege - each gets only the actions and r
 | --- | --- |
 | **Point-in-time recovery** | Enabled on both tables |
 | **Removal policy** | `RETAIN` - tables persist if the CloudFormation stack is deleted |
-| **Send log TTL** | 90 days (automatic cleanup) |
-| **Engagement event TTL** | 365 days (automatic cleanup) |
+| **Data TTL** | Disabled by default. Set `DATA_TTL_DAYS` to enable automatic cleanup |
 
 PITR backups inherit the table's encryption settings.
 
@@ -93,7 +92,7 @@ This is not required for most deployments - all SDK traffic already uses HTTPS.
 Mailshot stores subscriber PII (email, first name, custom attributes) in DynamoDB. To support data subject access requests:
 
 - **Delete a subscriber** - Use the `delete_subscriber` MCP tool or call the DynamoDB delete operations directly. This removes the profile, all execution records, and send logs.
-- **Engagement events** - The Events table has a 365-day TTL. For immediate deletion, query by `PK = SUB#{email}` and delete all matching items.
+- **Engagement events** - If `DATA_TTL_DAYS` is set, events expire automatically. For immediate deletion, query by `PK = SUB#{email}` and delete all matching items.
 - **SES suppression list** - Use the `remove_suppression` MCP tool to remove an email from the account-level suppression list.
 
 ## What not to store

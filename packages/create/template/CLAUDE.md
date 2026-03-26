@@ -40,7 +40,7 @@ pnpm --filter <sequenceId> typecheck  # Typecheck one sequence
 
 Each sequence is a directory under `sequences/<sequenceId>/` containing:
 
-- `sequence.config.ts` - typed definition (trigger event, steps, delays, branches)
+- `sequence.config.ts` - typed definition (sender identity, trigger event, steps, delays, branches)
 - `src/emails/*.tsx` (or any HTML source) - email templates
 - `src/render.ts` - renders templates to `build/<sequenceId>/templates/*.html`
 - `package.json` - declares the sequence as a workspace package
@@ -58,6 +58,8 @@ Available Liquid variables in every template:
 - Any custom attributes passed via the triggering event's `subscriberMapping.attributes`
 
 ## Sequence config types
+
+Each sequence defines its own **sender identity** via the `sender` field: `fromEmail`, `fromName`, `replyToEmail` (optional), `captureReplies` (optional, creates SES receipt rule for inbound reply capture). There are no project-level sender defaults — every sequence must define its own.
 
 Steps: `send`, `wait`, `choice` (branch on event data), `condition` (branch on DynamoDB lookup)
 

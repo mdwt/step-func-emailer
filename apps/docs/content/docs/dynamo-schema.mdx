@@ -68,7 +68,7 @@ sentSK("2026-03-17T10:30:00.000Z"); // → "SENT#2026-03-17T10:30:00.000Z"
   subject: "Welcome!",
   sequenceId: "onboarding",
   sentAt: "2026-03-17T10:30:00.000Z",
-  ttl: 1752710400, // 90 days from sentAt
+  ttl: 1752710400, // optional, set via DATA_TTL_DAYS
 }
 ```
 
@@ -96,16 +96,13 @@ sentSK("2026-03-17T10:30:00.000Z"); // → "SENT#2026-03-17T10:30:00.000Z"
 | Get suppression | `PK = SUB#email, SK = SUPPRESSION` |
 | Get everything for subscriber | `PK = SUB#email` (no SK condition) |
 
-### TTLs
+### TTL
 
-| Item type | TTL |
-| --- | --- |
-| Send logs | 90 days (`SEND_LOG_TTL_DAYS`) |
-| All others | No TTL (permanent until explicitly deleted) |
+All items are permanent by default. Set `DATA_TTL_DAYS` in `.env` to enable automatic expiry on send logs (the `ttl` attribute is set to `now + DATA_TTL_DAYS` at write time). Profiles, executions, and suppression records are never TTL'd.
 
 ## Events table
 
-Stores SES engagement events (delivery, open, click, bounce, complaint).
+Stores engagement events (delivery, open, click, bounce, complaint, reply).
 
 ### Key structure
 
@@ -124,7 +121,24 @@ Stores SES engagement events (delivery, open, click, bounce, complaint).
   sequenceId: "onboarding",
   subject: "Welcome!",
   timestamp: "2026-03-17T10:30:00.000Z",
-  ttl: 1784246400, // 365 days
+  ttl: 1784246400, // optional, set via DATA_TTL_DAYS
+}
+```
+
+Reply events include additional fields:
+
+```typescript
+{
+  PK: "SUB#user@example.com",
+  SK: "EVT#2026-03-20T14:00:00.000Z#reply",
+  eventType: "reply",
+  subject: "Re: Welcome!",
+  body: "Thanks for reaching out!",
+  templateKey: "onboarding/welcome",  // best-effort, from In-Reply-To correlation
+  sequenceId: "onboarding",           // best-effort, from In-Reply-To correlation
+  sesMessageId: "original-ses-id",    // original outbound message ID
+  timestamp: "2026-03-20T14:00:00.000Z",
+  ttl: 1784246400,
 }
 ```
 
@@ -142,9 +156,9 @@ Query: "Show me all opens for the welcome email in the last 7 days"
 PK = "onboarding/welcome", SK begins_with "EVT#2026-03-10"
 ```
 
-### TTLs
+### TTL
 
-All events expire after 365 days (`EVENT_TTL_DAYS`).
+Events are permanent by default. Set `DATA_TTL_DAYS` in `.env` to enable automatic expiry (applies to both tables).
 
 ## Why single-table design?
 
@@ -157,6 +171,5 @@ All subscriber data in one table means:
 
 The events table is separate because:
 
-- Different TTL (365 days vs permanent)
 - Different access patterns (cross-subscriber queries via GSI)
 - Higher write volume (every open/click generates a record)

@@ -252,12 +252,17 @@ describe("writeSendLog", () => {
   it("writes send log with TTL", async () => {
     mockSend.mockResolvedValueOnce({});
 
-    await writeSendLog("TestTable", "user@example.com", {
-      templateKey: "onboarding/welcome",
-      sequenceId: "onboarding",
-      subject: "Welcome!",
-      sesMessageId: "msg-123",
-    });
+    await writeSendLog(
+      "TestTable",
+      "user@example.com",
+      {
+        templateKey: "onboarding/welcome",
+        sequenceId: "onboarding",
+        subject: "Welcome!",
+        sesMessageId: "msg-123",
+      },
+      90,
+    );
 
     const cmd = mockSend.mock.calls[0][0];
     expect(cmd._type).toBe("PutItem");
@@ -266,6 +271,21 @@ describe("writeSendLog", () => {
     expect(item.SK).toMatch(/^SENT#/);
     expect(item.templateKey).toBe("onboarding/welcome");
     expect(item.ttl).toBeGreaterThan(0);
+  });
+
+  it("omits ttl when ttlDays is not provided", async () => {
+    mockSend.mockResolvedValueOnce({});
+
+    await writeSendLog("TestTable", "user@example.com", {
+      templateKey: "onboarding/welcome",
+      sequenceId: "onboarding",
+      subject: "Welcome!",
+      sesMessageId: "msg-123",
+    });
+
+    const cmd = mockSend.mock.calls[0][0];
+    const item = unmarshall(cmd.input.Item);
+    expect(item.ttl).toBeUndefined();
   });
 });
 

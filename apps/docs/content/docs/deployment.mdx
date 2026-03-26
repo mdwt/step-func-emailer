@@ -53,7 +53,18 @@ DEFAULT_FROM_EMAIL=hello@yourdomain.com
 DEFAULT_FROM_NAME=YourCompany
 REPLY_TO_EMAIL=support@yourdomain.com
 UNSUBSCRIBE_SECRET=<generate with: openssl rand -hex 32>
+# DATA_TTL_DAYS=365              # optional: auto-expire send logs and events after N days
 ```
+
+### Enabling inbound reply tracking
+
+If `REPLY_TO_EMAIL` is set, CDK automatically creates an SES receipt rule set and ReplyHandlerFn to track inbound replies. For this to work, you must add an MX record to your `REPLY_TO_EMAIL` domain:
+
+```
+MX 10 inbound-smtp.<region>.amazonaws.com
+```
+
+See [Events - Inbound reply tracking](/docs/events#inbound-reply-tracking) for details.
 
 ## Build pipeline
 
@@ -108,11 +119,11 @@ A single `cdk deploy` creates/updates everything:
 
 - **DynamoDB** - Main table + Events table (with TemplateIndex GSI)
 - **S3** - Template bucket + BucketDeployment (uploads `build/<sequenceId>/templates/` per sequence)
-- **Lambda** - 5 functions (SendEmail, CheckCondition, Unsubscribe, BounceHandler, EngagementHandler)
+- **Lambda** - 5-6 functions (SendEmail, CheckCondition, Unsubscribe, BounceHandler, EngagementHandler, and ReplyHandler if `REPLY_TO_EMAIL` is set)
 - **Step Functions** - One state machine per sequence (auto-discovered from `sequences/*/`)
 - **EventBridge** - Custom bus + routing rules for triggers and fire-and-forget events
-- **SES** - Configuration set + SNS event destinations
-- **SNS** - Topics for bounce/complaint and engagement notifications
+- **SES** - Configuration set + SNS event destinations + receipt rule set (if `REPLY_TO_EMAIL` is set)
+- **SNS** - Topics for bounce/complaint, engagement, and reply notifications
 ## Build artifacts
 
 After building, all artifacts are in `build/`:

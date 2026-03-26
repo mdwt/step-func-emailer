@@ -43,10 +43,8 @@ const config: MailshotConfig = {
   eventBusName: required("EVENT_BUS_NAME"),
   sesConfigSetName: required("SES_CONFIG_SET_NAME"),
   snsTopicName: required("SNS_TOPIC_NAME"),
-  defaultFromEmail: required("DEFAULT_FROM_EMAIL"),
-  defaultFromName: required("DEFAULT_FROM_NAME"),
-  replyToEmail: process.env.REPLY_TO_EMAIL || undefined,
   unsubscribeSecret: required("UNSUBSCRIBE_SECRET"),
+  dataTtlDays: process.env.DATA_TTL_DAYS ? parseInt(process.env.DATA_TTL_DAYS, 10) : undefined,
 };
 
 const definitions = loadSequenceConfigs();

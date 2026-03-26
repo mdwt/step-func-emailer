@@ -9,8 +9,6 @@ import {
   SUPPRESSION_SK,
   EVT_SK_PREFIX,
   TEMPLATE_INDEX,
-  SEND_LOG_TTL_DAYS,
-  EVENT_TTL_DAYS,
   TEMPLATE_CACHE_TTL_MS,
 } from "../constants.js";
 
@@ -52,8 +50,6 @@ describe("constants", () => {
     expect(SUPPRESSION_SK).toBe("SUPPRESSION");
     expect(EVT_SK_PREFIX).toBe("EVT#");
     expect(TEMPLATE_INDEX).toBe("TemplateIndex");
-    expect(SEND_LOG_TTL_DAYS).toBe(90);
-    expect(EVENT_TTL_DAYS).toBe(365);
     expect(TEMPLATE_CACHE_TTL_MS).toBe(600_000);
   });
 });

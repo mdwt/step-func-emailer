@@ -111,7 +111,7 @@ PK: SUB#user@example.com
 SK: SENT#2026-03-17T10:30:00.000Z
 ```
 
-Send logs have a 90-day TTL. They're used by the `has_been_sent` condition check and for auditing.
+Send logs are permanent by default. Set `DATA_TTL_DAYS` in `.env` to enable automatic expiry. They're used by the `has_been_sent` condition check and for auditing.
 
 ## Suppression records
 

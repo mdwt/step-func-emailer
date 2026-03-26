@@ -37,7 +37,7 @@ export interface SendLog {
   sequenceId: string;
   subject: string;
   sesMessageId: string;
-  ttl: number;
+  ttl?: number;
 }
 
 // ── Suppression record ──────────────────────────────────────────────────────
@@ -66,6 +66,7 @@ export interface SendInput {
   subject: string;
   sequenceId?: string;
   subscriber: Subscriber;
+  sender?: SenderConfig;
 }
 
 export interface FireAndForgetInput {
@@ -73,6 +74,7 @@ export interface FireAndForgetInput {
   templateKey: string;
   subject: string;
   subscriber: Subscriber;
+  sender?: SenderConfig;
 }
 
 export interface CompleteInput {
@@ -126,7 +128,7 @@ export interface UnsubscribeTokenPayload {
 
 // ── Email event (engagement tracking) ────────────────────────────────────────
 
-export type EmailEventType = "delivery" | "open" | "click" | "bounce" | "complaint";
+export type EmailEventType = "delivery" | "open" | "click" | "bounce" | "complaint" | "reply";
 
 export interface EmailEvent {
   PK: string; // SUB#<email>
@@ -209,8 +211,16 @@ export interface ExitEvent {
   subscriberMapping?: SubscriberMapping; // override sequence-level mapping (only email is used)
 }
 
+export interface SenderConfig {
+  fromEmail: string;
+  fromName: string;
+  replyToEmail?: string; // Reply-To header
+  captureReplies?: boolean; // If true, create SES receipt rule for replyToEmail
+}
+
 export interface SequenceDefinition {
   id: string;
+  sender: SenderConfig;
   trigger: SequenceTrigger;
   timeoutMinutes: number;
   steps: SequenceStep[];
@@ -230,8 +240,6 @@ export interface MailshotConfig {
   eventBusName: string;
   sesConfigSetName: string;
   snsTopicName: string;
-  defaultFromEmail: string;
-  defaultFromName: string;
-  replyToEmail?: string;
   unsubscribeSecret: string;
+  dataTtlDays?: number;
 }

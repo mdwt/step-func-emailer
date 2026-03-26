@@ -92,6 +92,11 @@ export class EventBusConstruct extends Construct {
                   action: "fire_and_forget",
                   templateKey: evt.templateKey,
                   subject: evt.subject,
+                  sender: {
+                    fromEmail: def.sender.fromEmail,
+                    fromName: def.sender.fromName,
+                    ...(def.sender.replyToEmail && { replyToEmail: def.sender.replyToEmail }),
+                  },
                   subscriber: evtSubscriber,
                 }),
               }),

@@ -168,7 +168,7 @@ server.registerTool(
     description: "Get engagement events for one subscriber",
     inputSchema: {
       email: z.string().email(),
-      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint", "reply"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),
@@ -194,7 +194,7 @@ server.registerTool(
     description: "Get engagement events across all subscribers for a template",
     inputSchema: {
       templateKey: z.string(),
-      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint", "reply"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),
@@ -220,7 +220,7 @@ server.registerTool(
     description: "Get engagement events for all templates in a sequence",
     inputSchema: {
       sequenceId: z.string(),
-      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint"]).optional(),
+      eventType: z.enum(["delivery", "open", "click", "bounce", "complaint", "reply"]).optional(),
       startDate: z.string().optional().describe("ISO 8601 date"),
       endDate: z.string().optional().describe("ISO 8601 date"),
       limit: z.number().int().min(1).max(100).optional().default(20),

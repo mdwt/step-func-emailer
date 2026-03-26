@@ -34,6 +34,13 @@ Extract from the user's description:
   - `delayBefore` - delay before this email (`0` for immediate, or e.g. `2 days`, `1 week`)
 - **branching** (optional) - any choice/condition logic (e.g., "different welcome email per platform", "skip if already sent")
 - **events** (optional) - one-off fire-and-forget emails triggered by events during the sequence (e.g., "send congrats on first sale")
+- **sender** - the sending configuration for this sequence:
+  - `fromEmail` - the email address to send from (must be verified in SES)
+  - `fromName` - the display name shown in the "From" field
+  - `replyToEmail` (optional) - the Reply-To address. Can be a normal email or an SES-managed inbox
+  - `captureReplies` (optional) - set to `true` if `replyToEmail` is an SES-managed inbox where inbound replies should be captured via SES receipt rules → SNS → Lambda (e.g., for cold outreach). Leave unset for normal email reply-to addresses
+
+Ask the user what type of sequence this is (e.g., transactional, marketing, cold outreach). If cold outreach or the user wants a managed inbox for reply tracking, set `captureReplies: true` and confirm the SES inbound email address.
 
 If any of these are missing or ambiguous, ask the user to clarify before generating code. Present your parsed interpretation to the user and confirm before proceeding.
 
@@ -103,6 +110,12 @@ const id = "<sequenceId>";
 
 export default {
   id,
+  sender: {
+    fromEmail: "<fromEmail>",
+    fromName: "<fromName>",
+    replyToEmail: "<replyToEmail>", // optional
+    // captureReplies: true,              // optional, for SES managed inbox
+  },
   trigger: {
     detailType: "<triggerEvent>",
     subscriberMapping: {

@@ -79,11 +79,15 @@ const CONFIG = {
   tableName: "TestTable",
   eventsTableName: "EventsTable",
   templateBucket: "my-bucket",
-  defaultFromEmail: "noreply@example.com",
-  defaultFromName: "Example",
   sesConfigSet: "my-config-set",
   unsubscribeBaseUrl: "https://unsub.example.com",
   unsubscribeSecret: "test-secret",
+};
+
+const TEST_SENDER = {
+  fromEmail: "noreply@example.com",
+  fromName: "Example",
+  replyToEmail: "support@example.com",
 };
 
 beforeEach(() => {
@@ -189,6 +193,7 @@ describe("send-email handler", () => {
       templateKey: "onboarding/welcome",
       subject: "Welcome!",
       subscriber: { email: "user@example.com", firstName: "Jane" },
+      sender: TEST_SENDER,
     };
 
     it("sends email successfully", async () => {
@@ -272,6 +277,7 @@ describe("send-email handler", () => {
         templateKey: "promo/sale",
         subject: "Sale!",
         subscriber: { email: "user@example.com", firstName: "Jane" },
+        sender: TEST_SENDER,
       });
 
       expect(result).toEqual({ sent: true, messageId: "msg-123" });

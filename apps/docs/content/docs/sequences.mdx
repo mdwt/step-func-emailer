@@ -139,6 +139,42 @@ events: [
 
 These create separate EventBridge rules that invoke SendEmailFn directly (no Step Functions). The email is sent immediately when the event fires.
 
+## Exit events
+
+Remove a subscriber from a sequence when a specific event fires. This uses EventBridge rules that route to SequenceExitFn, which stops the Step Functions execution.
+
+```typescript
+exitOn: [
+  {
+    detailType: "customer.upgraded",
+    subscriberMapping: {
+      email: "$.detail.email",
+      firstName: "$.detail.email",
+    },
+  },
+],
+```
+
+Exit events are optional per sequence. When the matching EventBridge event fires, the subscriber's active execution for this sequence is stopped and the execution record is deleted.
+
+### Stopping on reply
+
+If [inbound reply tracking](/docs/events#inbound-reply-tracking) is enabled, sequences can stop when a subscriber replies:
+
+```typescript
+exitOn: [
+  {
+    detailType: "email.replied",
+    subscriberMapping: {
+      email: "$.detail.email",
+      firstName: "$.detail.email",
+    },
+  },
+],
+```
+
+This is useful for cold outreach sequences - when someone replies, you probably want to stop the automated emails and handle the conversation manually. Onboarding sequences typically omit this.
+
 ## Auto-discovery
 
 CDK scans `sequences/*/sequence.config.ts` at deploy time. You never need to manually register a sequence - just create the folder and deploy. The CDK constructs automatically:

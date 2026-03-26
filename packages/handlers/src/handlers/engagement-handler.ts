@@ -1,7 +1,7 @@
 import type { SNSEvent } from "aws-lambda";
 import { DynamoDBClient, PutItemCommand } from "@aws-sdk/client-dynamodb";
 import { marshall } from "@aws-sdk/util-dynamodb";
-import { subscriberPK, eventSK, EVENT_TTL_DAYS } from "@mailshot/shared";
+import { subscriberPK, eventSK } from "@mailshot/shared";
 import type { EmailEventType } from "@mailshot/shared";
 import { resolveConfig } from "../lib/config.js";
 import { createLogger } from "../lib/logger.js";
@@ -137,7 +137,9 @@ export const handler = async (event: SNSEvent): Promise<void> => {
     });
 
     const now = new Date();
-    const ttl = Math.floor(now.getTime() / 1000) + EVENT_TTL_DAYS * 86400;
+    const ttl = config.dataTtlDays
+      ? Math.floor(now.getTime() / 1000) + config.dataTtlDays * 86400
+      : undefined;
 
     for (const email of recipients) {
       logger.debug("Writing engagement event", { email, eventType, templateKey });
@@ -156,7 +158,7 @@ export const handler = async (event: SNSEvent): Promise<void> => {
               ...(userAgent ? { userAgent } : {}),
               sesMessageId: notification.mail.messageId,
               timestamp,
-              ttl,
+              ...(ttl !== undefined ? { ttl } : {}),
             },
             { removeUndefinedValues: true },
           ),

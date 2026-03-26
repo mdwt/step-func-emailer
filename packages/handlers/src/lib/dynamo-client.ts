@@ -15,7 +15,6 @@ import {
   SUPPRESSION_SK,
   EXEC_SK_PREFIX,
   SENT_SK_PREFIX,
-  SEND_LOG_TTL_DAYS,
 } from "@mailshot/shared";
 import type { Subscriber, SubscriberProfile, ActiveExecution, SendLog } from "@mailshot/shared";
 import { createLogger } from "./logger.js";
@@ -204,9 +203,10 @@ export async function writeSendLog(
   tableName: string,
   email: string,
   log: Omit<SendLog, "PK" | "SK" | "ttl">,
+  ttlDays?: number,
 ): Promise<void> {
   const now = new Date();
-  const ttl = Math.floor(now.getTime() / 1000) + SEND_LOG_TTL_DAYS * 86400;
+  const ttl = ttlDays ? Math.floor(now.getTime() / 1000) + ttlDays * 86400 : undefined;
   logger.info("Writing send log", {
     email,
     templateKey: log.templateKey,
@@ -216,14 +216,42 @@ export async function writeSendLog(
   await dynamo.send(
     new PutItemCommand({
       TableName: tableName,
-      Item: marshall({
-        PK: subscriberPK(email),
-        SK: sentSK(now.toISOString()),
-        ...log,
-        ttl,
-      }),
+      Item: marshall(
+        {
+          PK: subscriberPK(email),
+          SK: sentSK(now.toISOString()),
+          ...log,
+          ...(ttl !== undefined ? { ttl } : {}),
+        },
+        { removeUndefinedValues: true },
+      ),
     }),
   );
+}
+
+export async function getSendLogByMessageId(
+  tableName: string,
+  email: string,
+  sesMessageId: string,
+): Promise<SendLog | null> {
+  logger.debug("Querying send log by message ID", { email, sesMessageId });
+  const result = await dynamo.send(
+    new QueryCommand({
+      TableName: tableName,
+      KeyConditionExpression: "PK = :pk AND begins_with(SK, :prefix)",
+      FilterExpression: "sesMessageId = :msgId",
+      ExpressionAttributeValues: marshall({
+        ":pk": subscriberPK(email),
+        ":prefix": SENT_SK_PREFIX,
+        ":msgId": sesMessageId,
+      }),
+      Limit: 1,
+    }),
+  );
+  if (result.Items && result.Items.length > 0) {
+    return unmarshall(result.Items[0]) as SendLog;
+  }
+  return null;
 }
 
 export async function hasBeenSent(

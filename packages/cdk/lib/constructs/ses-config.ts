@@ -1,16 +1,19 @@
 import * as ses from "aws-cdk-lib/aws-ses";
+import * as sesActions from "aws-cdk-lib/aws-ses-actions";
 import * as sns from "aws-cdk-lib/aws-sns";
 import { Construct } from "constructs";
 
 export interface SesConfigProps {
   configSetName: string;
   snsTopicName: string;
+  replyToEmails?: string[];
 }
 
 export class SesConfigConstruct extends Construct {
   public readonly configurationSet: ses.ConfigurationSet;
   public readonly snsTopic: sns.Topic;
   public readonly engagementTopic: sns.Topic;
+  public readonly replyTopic?: sns.Topic;
 
   constructor(scope: Construct, id: string, props: SesConfigProps) {
     super(scope, id);
@@ -45,5 +48,26 @@ export class SesConfigConstruct extends Construct {
         ses.EmailSendingEvent.COMPLAINT,
       ],
     });
+
+    // ── Inbound reply handling (opt-in, per-sequence captureReplies) ───
+    if (props.replyToEmails && props.replyToEmails.length > 0) {
+      this.replyTopic = new sns.Topic(this, "ReplyTopic", {
+        topicName: `${props.snsTopicName}-replies`,
+      });
+
+      const ruleSet = new ses.ReceiptRuleSet(this, "ReplyRuleSet", {
+        receiptRuleSetName: `${props.configSetName}-replies`,
+      });
+
+      ruleSet.addRule("ReplyRule", {
+        recipients: props.replyToEmails,
+        actions: [
+          new sesActions.Sns({
+            topic: this.replyTopic,
+            encoding: sesActions.EmailEncoding.UTF8,
+          }),
+        ],
+      });
+    }
   }
 }

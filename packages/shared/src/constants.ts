@@ -7,8 +7,6 @@ export const subscriberPK = (email: string): string => `SUB#${email}`;
 export const executionSK = (sequenceId: string): string => `${EXEC_SK_PREFIX}${sequenceId}`;
 export const sentSK = (isoTimestamp: string): string => `${SENT_SK_PREFIX}${isoTimestamp}`;
 
-export const SEND_LOG_TTL_DAYS = 90;
-
 export const TEMPLATE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
 // ── Events table ───────────────────────────────────────────────────────────
@@ -18,5 +16,3 @@ export const TEMPLATE_INDEX = "TemplateIndex" as const;
 
 export const eventSK = (isoTimestamp: string, eventType: string): string =>
   `${EVT_SK_PREFIX}${isoTimestamp}#${eventType}`;
-
-export const EVENT_TTL_DAYS = 365;

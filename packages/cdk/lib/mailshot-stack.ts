@@ -35,9 +35,19 @@ export class MailshotStack extends cdk.Stack {
     });
 
     // ── SES configuration ────────────────────────────────────────────────
+    // Collect unique reply-to emails from sequences with captureReplies enabled
+    const replyToEmails = [
+      ...new Set(
+        definitions
+          .filter((d) => d.sender.captureReplies && d.sender.replyToEmail)
+          .map((d) => d.sender.replyToEmail!),
+      ),
+    ];
+
     const sesConfig = new SesConfigConstruct(this, "SesConfig", {
       configSetName: config.sesConfigSetName,
       snsTopicName: config.snsTopicName,
+      replyToEmails: replyToEmails.length > 0 ? replyToEmails : undefined,
     });
 
     // ── Lambdas ──────────────────────────────────────────────────────────
@@ -46,11 +56,11 @@ export class MailshotStack extends cdk.Stack {
       eventsTable: storage.eventsTable,
       templateBucket: storage.templateBucket,
       snsTopic: sesConfig.snsTopic,
+      replyTopic: sesConfig.replyTopic,
       sesConfigSetName: config.sesConfigSetName,
-      defaultFromEmail: config.defaultFromEmail,
-      defaultFromName: config.defaultFromName,
-      replyToEmail: config.replyToEmail,
       unsubscribeSecret: config.unsubscribeSecret,
+      eventBusName: config.eventBusName,
+      dataTtlDays: config.dataTtlDays,
       handlersPath: props.handlersPath,
     });
 

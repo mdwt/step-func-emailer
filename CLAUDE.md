@@ -46,7 +46,7 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 1. App backend publishes events to EventBridge custom bus
 2. EventBridge rules route to either Step Functions (sequences) or SendEmailFn directly (fire-and-forget)
 3. Step Functions state machines call SendEmailFn for register/send/complete actions
-4. SendEmailFn: reads subscriber from DynamoDB → pre-send checks → fetches template from S3 → renders with LiquidJS → sends via SES → writes send log
+4. SendEmailFn: reads subscriber from DynamoDB → pre-send checks → fetches template from S3 → renders with LiquidJS → sends via SES (using sender config from event payload) → writes send log
 5. SES bounce/complaint notifications → SNS → BounceHandlerFn → suppresses subscriber, stops executions
 6. SES engagement events (delivery, open, click, bounce, complaint) → SNS → EngagementHandlerFn → writes to EmailEvents table
 7. Unsubscribe link → UnsubscribeFn (Lambda Function URL, no auth) → marks unsubscribed, stops executions
@@ -55,7 +55,7 @@ Serverless email sequencing framework on AWS. Product-agnostic: the framework de
 
 **Main table** (single-table design): All items keyed by `PK = SUB#<email>`. Sort keys: `PROFILE`, `EXEC#<sequenceId>`, `SENT#<timestamp>`, `SUPPRESSION`. No GSIs. Subscriber attributes (platform, country, gateway, etc.) are stored as **top-level columns** on the PROFILE item - not nested under an `attributes` map. System columns (`PK`, `SK`, `email`, `firstName`, `unsubscribed`, `suppressed`, `createdAt`, `updatedAt`) are fixed; everything else is a dynamic attribute. Use `extractAttributes(profile)` from `dynamo-client.ts` to separate custom attributes from system columns.
 
-**Events table** (engagement tracking): `PK = SUB#<email>`, `SK = EVT#<timestamp>#<eventType>`. GSI `TemplateIndex` on `templateKey` + `SK` for cross-subscriber template queries. TTL-enabled (365 days).
+**Events table** (engagement tracking): `PK = SUB#<email>`, `SK = EVT#<timestamp>#<eventType>`. GSI `TemplateIndex` on `templateKey` + `SK` for cross-subscriber template queries. Optional TTL via `DATA_TTL_DAYS` env var (disabled by default).
 
 ### Resource tags
 
@@ -70,7 +70,7 @@ These tags can be activated as **cost allocation tags** in AWS Billing to track 
 
 - **storage** - DynamoDB main table + events table + S3 template bucket + BucketDeployment
 - **lambdas** - Five NodejsFunction Lambdas with esbuild bundling (AWS SDK externalized). Config passed as environment variables
-- **ses-config** - SES configuration set + SNS topics for bounce/complaint and engagement events
+- **ses-config** - SES configuration set + SNS topics for bounce/complaint and engagement events. Creates SES receipt rules for sequences with `captureReplies: true`
 - **state-machines** - Step Functions definitions (auto-discovered from sequences)
 - **event-bus** - Custom EventBridge bus + routing rules
 
@@ -83,6 +83,17 @@ These tags can be activated as **cost allocation tags** in AWS Billing to track 
 - **unsubscribe-token** - HMAC-SHA256 token generation/validation (90-day expiry)
 - **display-names** - Optional value→display name mappings loaded from S3
 - **execution-stopper** - Stops all Step Functions executions for a subscriber
+
+### Per-sequence sender config
+
+Each sequence defines its own sender identity in `sequence.config.ts` via the `sender` field on `SequenceDefinition`:
+
+- `fromEmail` (required) - the SES-verified address to send from
+- `fromName` (required) - display name in the "From" field
+- `replyToEmail` (optional) - Reply-To header address
+- `captureReplies` (optional) - when `true`, CDK creates an SES receipt rule for `replyToEmail` to capture inbound replies via SNS → ReplyHandlerFn. Use for SES-managed inboxes (e.g., cold outreach). Leave unset when reply-to is a normal email address
+
+Sender config is baked into Step Functions payloads at deploy time (static, not dynamic). The SendEmailFn reads `sender` from the event payload, not from environment variables. There are no project-level sender defaults — every sequence must define its own.
 
 ## Key Conventions
 

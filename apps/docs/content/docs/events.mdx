@@ -3,7 +3,7 @@ title: Events & Engagement
 description: EventBridge event ingestion, SES engagement tracking, and analytics.
 ---
 
-The system uses events at two levels: **EventBridge events** to trigger sequences and emails, and **SES engagement events** to track delivery, opens, clicks, bounces, and complaints.
+The system uses events at two levels: **EventBridge events** to trigger sequences and emails, and **SES engagement events** to track delivery, opens, clicks, bounces, complaints, and replies.
 
 ## EventBridge events
 
@@ -74,7 +74,7 @@ await eventBridgeClient.send(
 
 ## SES engagement tracking
 
-SES publishes engagement events to SNS, which triggers EngagementHandlerFn. Five event types are tracked:
+SES publishes engagement events to SNS, which triggers EngagementHandlerFn. Six event types are tracked:
 
 | Event type | What it means |
 | --- | --- |
@@ -83,6 +83,7 @@ SES publishes engagement events to SNS, which triggers EngagementHandlerFn. Five
 | `click` | Recipient clicked a tracked link |
 | `bounce` | Email bounced (permanent or transient) |
 | `complaint` | Recipient marked the email as spam |
+| `reply` | Recipient replied to the email (requires inbound reply handling) |
 
 ### Events table
 
@@ -95,12 +96,17 @@ SK: EVT#2026-03-17T10:30:00.000Z#delivery
 
 Each event record includes:
 
-- `eventType` - delivery, open, click, bounce, complaint
+- `eventType` - delivery, open, click, bounce, complaint, reply
 - `templateKey` - Which template was sent
 - `sequenceId` - Which sequence the email belonged to
 - `subject` - Email subject line
 - `timestamp` - When the event occurred
-- `ttl` - 365 days from creation (auto-deleted)
+- `ttl` - Optional, set via `DATA_TTL_DAYS` env var (unset = permanent)
+
+Reply events additionally include:
+
+- `body` - Plain text content of the reply
+- `sesMessageId` - The original outbound message ID (from `In-Reply-To` header, best-effort)
 
 ### TemplateIndex GSI
 
@@ -121,6 +127,50 @@ Bounces and complaints flow through two paths:
 2. **BounceHandlerFn** - Suppresses the subscriber and stops all executions
 
 BounceHandlerFn only acts on permanent bounces and complaints. Transient bounces are recorded but don't trigger suppression.
+
+## Inbound reply tracking
+
+When `REPLY_TO_EMAIL` is set in `.env` and the receiving domain has MX records pointing to SES, inbound replies are automatically tracked as engagement events.
+
+### How it works
+
+```
+Inbound Reply → SES Receipt Rule → SNS → ReplyHandlerFn
+  1. Parses raw email from SNS notification
+  2. Matches sender to subscriber in DynamoDB
+  3. Writes reply event to Events table (eventType: "reply")
+  4. Publishes "email.replied" to EventBridge
+```
+
+ReplyHandlerFn performs best-effort correlation: if the reply's `In-Reply-To` header contains the original SES message ID, it queries the send log to tag the reply with the `sequenceId` and `templateKey` of the email being replied to. This isn't guaranteed (not all mail clients include `In-Reply-To`).
+
+### Stopping sequences on reply
+
+Any sequence can opt into stopping when a subscriber replies by using `exitOn`:
+
+```typescript
+exitOn: [
+  {
+    detailType: "email.replied",
+    subscriberMapping: {
+      email: "$.detail.email",
+      firstName: "$.detail.email",
+    },
+  },
+],
+```
+
+This uses the existing `exitOn` mechanism - an EventBridge rule routes `email.replied` events to SequenceExitFn, which stops the execution. See [Sequences - Exit events](/docs/sequences) for details.
+
+### DNS requirements
+
+SES inbound email requires MX records pointing to SES for the receiving domain. Add an MX record for your `REPLY_TO_EMAIL` domain:
+
+```
+MX 10 inbound-smtp.<region>.amazonaws.com
+```
+
+Replace `<region>` with your AWS region (e.g., `us-east-1`). SES receipt rules are only available in certain regions (us-east-1, us-west-2, eu-west-1, and a few others).
 
 ## Querying engagement via MCP
 

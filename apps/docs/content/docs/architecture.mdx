@@ -16,8 +16,8 @@ description: System overview, AWS services, data flow, caching, and cost model.
 | --- | --- |
 | **EventBridge** | Event ingestion and routing. Custom bus receives events from your app. Rules route to Step Functions (sequences) or Lambda (fire-and-forget). |
 | **Step Functions** | Sequence orchestration. One state machine per sequence. Handles branching, delays, and step ordering. |
-| **Lambda** | Five functions: SendEmail, CheckCondition, Unsubscribe, BounceHandler, EngagementHandler. |
-| **DynamoDB** | Two tables. Main table: subscriber profiles, active executions, send logs, suppression records. Events table: engagement tracking (opens, clicks, deliveries). |
+| **Lambda** | Six functions: SendEmail, CheckCondition, Unsubscribe, BounceHandler, EngagementHandler, ReplyHandler (conditional). |
+| **DynamoDB** | Two tables. Main table: subscriber profiles, active executions, send logs, suppression records. Events table: engagement tracking (opens, clicks, deliveries, replies). |
 | **S3** | HTML email templates. Deployed via CDK BucketDeployment. Cached in Lambda memory for 10 minutes. |
 | **SES** | Email delivery with open/click tracking via configuration set. |
 | **SNS** | Routes SES notifications (bounces, complaints, engagement events) to Lambda handlers. |
@@ -68,6 +68,11 @@ description: System overview, AWS services, data flow, caching, and cost model.
         └─ Unsubscribe link ──→ UnsubscribeFn (Function URL)
                                    └─ mark unsubscribed
                                    └─ stop executions
+
+  Inbound Reply ──→ SES Receipt Rule ──→ SNS ──→ ReplyHandlerFn
+                    (if REPLY_TO_EMAIL set)        └─ write reply to Events table
+                                                   └─ publish email.replied to EventBridge
+                                                   └─ exitOn rules stop sequences
 ```
 
 ## Cost model
