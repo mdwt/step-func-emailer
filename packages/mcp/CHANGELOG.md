@@ -1,5 +1,16 @@
 # @mailshot/mcp
 
+## 1.3.0
+
+### Minor Changes
+
+- [`7514d53`](https://github.com/mdwt/mailshot/commit/7514d53ffe2e710bc0a124ac337102e076ac3a41) Thanks [@mdwt](https://github.com/mdwt)! - Add inbound reply tracking as an engagement event type
+
+### Patch Changes
+
+- Updated dependencies [[`7514d53`](https://github.com/mdwt/mailshot/commit/7514d53ffe2e710bc0a124ac337102e076ac3a41)]:
+  - @mailshot/shared@1.3.0
+
 ## 1.2.0
 
 ### Patch Changes
