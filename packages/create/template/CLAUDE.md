@@ -59,7 +59,7 @@ Available Liquid variables in every template:
 
 ## Sequence config types
 
-Each sequence defines its own **sender identity** via the `sender` field: `fromEmail`, `fromName`, `replyToEmail` (optional), `captureReplies` (optional, creates SES receipt rule for inbound reply capture). There are no project-level sender defaults — every sequence must define its own.
+Each sequence defines its own **sender identity** via the `sender` field: `fromEmail`, `fromName`, `replyToEmail` (optional), `captureReplies` (optional, creates SES receipt rule for inbound reply capture), `forwardRepliesTo` (optional, forwards captured replies to this inbox). There are no project-level sender defaults — every sequence must define its own.
 
 Steps: `send`, `wait`, `choice` (branch on event data), `condition` (branch on DynamoDB lookup)
 

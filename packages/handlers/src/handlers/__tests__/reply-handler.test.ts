@@ -4,6 +4,7 @@ import type { SNSEvent } from "aws-lambda";
 const mockResolveConfig = vi.fn();
 const mockDynamoSend = vi.fn();
 const mockEventBridgeSend = vi.fn();
+const mockSesSend = vi.fn();
 const mockGetSubscriberProfile = vi.fn();
 const mockGetSendLogByMessageId = vi.fn();
 
@@ -32,6 +33,18 @@ vi.mock("@aws-sdk/util-dynamodb", async () => {
   const actual = await vi.importActual("@aws-sdk/util-dynamodb");
   return actual;
 });
+
+vi.mock("@aws-sdk/client-sesv2", () => ({
+  SESv2Client: class {
+    send = mockSesSend;
+  },
+  SendEmailCommand: class {
+    input: unknown;
+    constructor(input: unknown) {
+      this.input = input;
+    }
+  },
+}));
 
 vi.mock("@aws-sdk/client-eventbridge", () => ({
   EventBridgeClient: class {
@@ -107,6 +120,7 @@ function receiptNotification(rawEmail: string) {
     notificationType: "Received",
     receipt: {
       timestamp: "2026-03-26T10:00:00.000Z",
+      recipients: ["replies@mydomain.com"],
       action: { type: "SNS" },
     },
     mail: {
@@ -126,6 +140,7 @@ beforeEach(() => {
   mockResolveConfig.mockReset().mockReturnValue(CONFIG);
   mockDynamoSend.mockReset().mockResolvedValue({});
   mockEventBridgeSend.mockReset().mockResolvedValue({});
+  mockSesSend.mockReset().mockResolvedValue({});
   mockGetSubscriberProfile.mockReset();
   mockGetSendLogByMessageId.mockReset();
 });
@@ -222,6 +237,82 @@ describe("reply-handler", () => {
 
     expect(mockGetSubscriberProfile).not.toHaveBeenCalled();
     expect(mockDynamoSend).not.toHaveBeenCalled();
+  });
+
+  it("forwards reply when replyForwardTo is configured", async () => {
+    mockResolveConfig.mockReturnValue({
+      ...CONFIG,
+      replyForwardTo: "team@company.com",
+    });
+    mockGetSubscriberProfile.mockResolvedValue({
+      PK: "SUB#subscriber@example.com",
+      SK: "PROFILE",
+      email: "subscriber@example.com",
+      firstName: "Test",
+    });
+
+    const rawEmail = makeRawEmail({
+      from: "subscriber@example.com",
+      subject: "Re: Hello",
+      body: "Thanks for reaching out!",
+    });
+
+    await handler(snsEvent(receiptNotification(rawEmail)));
+
+    expect(mockSesSend).toHaveBeenCalledOnce();
+    const sesCmd = mockSesSend.mock.calls[0][0];
+    expect(sesCmd.input.Destination.ToAddresses).toEqual(["team@company.com"]);
+
+    // Verify From header was rewritten
+    const rawContent = Buffer.from(sesCmd.input.Content.Raw.Data).toString("utf-8");
+    expect(rawContent).toContain("Reply from subscriber@example.com");
+    expect(rawContent).toContain("replies@mydomain.com");
+    expect(rawContent).toContain("Reply-To: subscriber@example.com");
+  });
+
+  it("does not forward when replyForwardTo is not configured", async () => {
+    mockGetSubscriberProfile.mockResolvedValue({
+      PK: "SUB#subscriber@example.com",
+      SK: "PROFILE",
+      email: "subscriber@example.com",
+      firstName: "Test",
+    });
+
+    const rawEmail = makeRawEmail({
+      from: "subscriber@example.com",
+      subject: "Re: Hello",
+      body: "Thanks!",
+    });
+
+    await handler(snsEvent(receiptNotification(rawEmail)));
+
+    expect(mockSesSend).not.toHaveBeenCalled();
+  });
+
+  it("does not throw when forwarding fails", async () => {
+    mockResolveConfig.mockReturnValue({
+      ...CONFIG,
+      replyForwardTo: "team@company.com",
+    });
+    mockGetSubscriberProfile.mockResolvedValue({
+      PK: "SUB#subscriber@example.com",
+      SK: "PROFILE",
+      email: "subscriber@example.com",
+      firstName: "Test",
+    });
+    mockSesSend.mockRejectedValue(new Error("SES failure"));
+
+    const rawEmail = makeRawEmail({
+      from: "subscriber@example.com",
+      subject: "Re: Hello",
+      body: "Thanks!",
+    });
+
+    // Should not throw - forwarding errors are caught
+    await expect(handler(snsEvent(receiptNotification(rawEmail)))).resolves.toBeUndefined();
+
+    // Event should still have been written
+    expect(mockDynamoSend).toHaveBeenCalledOnce();
   });
 
   it("skips EventBridge publish when eventBusName is empty", async () => {

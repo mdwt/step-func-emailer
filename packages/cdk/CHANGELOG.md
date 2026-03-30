@@ -1,5 +1,17 @@
 # @mailshot/cdk
 
+## 1.4.0
+
+### Minor Changes
+
+- Add reply forwarding via `forwardRepliesTo` sender config option
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @mailshot/shared@1.4.0
+  - @mailshot/handlers@1.4.0
+
 ## 1.3.0
 
 ### Minor Changes

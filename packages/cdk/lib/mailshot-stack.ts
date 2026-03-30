@@ -44,6 +44,19 @@ export class MailshotStack extends cdk.Stack {
       ),
     ];
 
+    // Collect forwardRepliesTo (validate all sequences agree on a single value)
+    const forwardRepliesSet = new Set(
+      definitions
+        .filter((d) => d.sender.captureReplies && d.sender.forwardRepliesTo)
+        .map((d) => d.sender.forwardRepliesTo!),
+    );
+    if (forwardRepliesSet.size > 1) {
+      throw new Error(
+        `Conflicting forwardRepliesTo values across sequences: ${[...forwardRepliesSet].join(", ")}. All sequences must use the same forwardRepliesTo address.`,
+      );
+    }
+    const replyForwardTo = forwardRepliesSet.size === 1 ? [...forwardRepliesSet][0] : undefined;
+
     const sesConfig = new SesConfigConstruct(this, "SesConfig", {
       configSetName: config.sesConfigSetName,
       snsTopicName: config.snsTopicName,
@@ -61,6 +74,7 @@ export class MailshotStack extends cdk.Stack {
       unsubscribeSecret: config.unsubscribeSecret,
       eventBusName: config.eventBusName,
       dataTtlDays: config.dataTtlDays,
+      replyForwardTo,
       handlersPath: props.handlersPath,
     });
 

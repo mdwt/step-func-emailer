@@ -1,5 +1,12 @@
 # @mailshot/mcp
 
+## 1.4.0
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @mailshot/shared@1.4.0
+
 ## 1.3.0
 
 ### Minor Changes

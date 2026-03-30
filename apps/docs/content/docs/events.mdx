@@ -162,6 +162,29 @@ exitOn: [
 
 This uses the existing `exitOn` mechanism - an EventBridge rule routes `email.replied` events to SequenceExitFn, which stops the execution. See [Sequences - Exit events](/docs/sequences) for details.
 
+### Forwarding replies to your inbox
+
+By default, captured replies are processed (stored as events, published to EventBridge) but not forwarded anywhere. To receive replies in your real inbox so you can continue the conversation, add `forwardRepliesTo` to your sequence's sender config:
+
+```typescript
+sender: {
+  fromEmail: "you@yourdomain.com",
+  fromName: "Your Name",
+  replyToEmail: "replies@yourdomain.com",
+  captureReplies: true,
+  forwardRepliesTo: "your-real-inbox@gmail.com",
+},
+```
+
+When a reply arrives, ReplyHandlerFn:
+
+1. Processes it normally (stores event, publishes to EventBridge)
+2. Forwards the raw email to `forwardRepliesTo` via SES
+3. Rewrites the `From:` header to the verified `replyToEmail` address (SES requires a verified sender)
+4. Sets `Reply-To:` to the original sender's address, so you can reply directly back to them
+
+Forwarding is fire-and-forget — if it fails, the reply event is still recorded and the sequence still stops (if `exitOn` is configured). Errors are logged but don't affect the rest of the handler.
+
 ### DNS requirements
 
 SES inbound email requires MX records pointing to SES for the receiving domain. Add an MX record for your `REPLY_TO_EMAIL` domain:

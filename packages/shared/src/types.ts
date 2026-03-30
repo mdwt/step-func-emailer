@@ -216,6 +216,7 @@ export interface SenderConfig {
   fromName: string;
   replyToEmail?: string; // Reply-To header
   captureReplies?: boolean; // If true, create SES receipt rule for replyToEmail
+  forwardRepliesTo?: string; // Forward captured replies to this email address
 }
 
 export interface SequenceDefinition {

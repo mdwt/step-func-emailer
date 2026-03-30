@@ -92,6 +92,7 @@ Each sequence defines its own sender identity in `sequence.config.ts` via the `s
 - `fromName` (required) - display name in the "From" field
 - `replyToEmail` (optional) - Reply-To header address
 - `captureReplies` (optional) - when `true`, CDK creates an SES receipt rule for `replyToEmail` to capture inbound replies via SNS → ReplyHandlerFn. Use for SES-managed inboxes (e.g., cold outreach). Leave unset when reply-to is a normal email address
+- `forwardRepliesTo` (optional) - when set alongside `captureReplies`, forwards captured replies to this email address via SES. The `From:` header is rewritten to the verified `replyToEmail` with `Reply-To:` set to the original sender, so you can reply directly back
 
 Sender config is baked into Step Functions payloads at deploy time (static, not dynamic). The SendEmailFn reads `sender` from the event payload, not from environment variables. There are no project-level sender defaults — every sequence must define its own.
 

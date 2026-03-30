@@ -1,5 +1,11 @@
 # @mailshot/shared
 
+## 1.4.0
+
+### Minor Changes
+
+- Add reply forwarding via `forwardRepliesTo` sender config option
+
 ## 1.3.0
 
 ### Minor Changes

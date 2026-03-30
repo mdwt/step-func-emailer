@@ -175,6 +175,8 @@ exitOn: [
 
 This is useful for cold outreach sequences - when someone replies, you probably want to stop the automated emails and handle the conversation manually. Onboarding sequences typically omit this.
 
+To also receive replies in your real inbox, add `forwardRepliesTo` to your sender config. See [Forwarding replies to your inbox](/docs/events#forwarding-replies-to-your-inbox) for details.
+
 ## Auto-discovery
 
 CDK scans `sequences/*/sequence.config.ts` at deploy time. You never need to manually register a sequence - just create the folder and deploy. The CDK constructs automatically:

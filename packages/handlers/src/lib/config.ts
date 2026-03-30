@@ -7,6 +7,7 @@ export interface ResolvedConfig {
   unsubscribeSecret: string;
   eventBusName: string;
   dataTtlDays?: number;
+  replyForwardTo?: string;
 }
 
 function required(name: string): string {
@@ -27,5 +28,6 @@ export function resolveConfig(): ResolvedConfig {
     unsubscribeSecret: required("UNSUBSCRIBE_SECRET"),
     eventBusName: process.env.EVENT_BUS_NAME ?? "",
     dataTtlDays: process.env.DATA_TTL_DAYS ? parseInt(process.env.DATA_TTL_DAYS, 10) : undefined,
+    replyForwardTo: process.env.REPLY_FORWARD_TO || undefined,
   };
 }

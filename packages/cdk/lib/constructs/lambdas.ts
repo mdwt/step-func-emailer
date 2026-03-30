@@ -19,6 +19,7 @@ export interface LambdasProps {
   unsubscribeSecret: string;
   eventBusName?: string;
   dataTtlDays?: number;
+  replyForwardTo?: string;
   logLevel?: string;
   handlersPath?: string;
 }
@@ -205,6 +206,18 @@ export class LambdasConstruct extends Construct {
             actions: ["events:PutEvents"],
             resources: [
               `arn:aws:events:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:event-bus/${props.eventBusName}`,
+            ],
+          }),
+        );
+      }
+
+      if (props.replyForwardTo) {
+        this.replyHandlerFn.addEnvironment("REPLY_FORWARD_TO", props.replyForwardTo);
+        this.replyHandlerFn.addToRolePolicy(
+          new iam.PolicyStatement({
+            actions: ["ses:SendEmail", "ses:SendRawEmail"],
+            resources: [
+              `arn:aws:ses:${cdk.Stack.of(this).region}:${cdk.Stack.of(this).account}:identity/*`,
             ],
           }),
         );

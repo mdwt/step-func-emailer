@@ -39,6 +39,7 @@ Extract from the user's description:
   - `fromName` - the display name shown in the "From" field
   - `replyToEmail` (optional) - the Reply-To address. Can be a normal email or an SES-managed inbox
   - `captureReplies` (optional) - set to `true` if `replyToEmail` is an SES-managed inbox where inbound replies should be captured via SES receipt rules → SNS → Lambda (e.g., for cold outreach). Leave unset for normal email reply-to addresses
+  - `forwardRepliesTo` (optional) - when set alongside `captureReplies`, forwards captured replies to this email address so the user can read and respond to them
 
 Ask the user what type of sequence this is (e.g., transactional, marketing, cold outreach). If cold outreach or the user wants a managed inbox for reply tracking, set `captureReplies: true` and confirm the SES inbound email address.
 
@@ -115,6 +116,7 @@ export default {
     fromName: "<fromName>",
     replyToEmail: "<replyToEmail>", // optional
     // captureReplies: true,              // optional, for SES managed inbox
+    // forwardRepliesTo: "team@example.com", // optional, forward replies to inbox
   },
   trigger: {
     detailType: "<triggerEvent>",
