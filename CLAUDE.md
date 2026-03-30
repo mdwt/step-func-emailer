@@ -93,8 +93,25 @@ Each sequence defines its own sender identity in `sequence.config.ts` via the `s
 - `replyToEmail` (optional) - Reply-To header address
 - `captureReplies` (optional) - when `true`, CDK creates an SES receipt rule for `replyToEmail` to capture inbound replies via SNS → ReplyHandlerFn. Use for SES-managed inboxes (e.g., cold outreach). Leave unset when reply-to is a normal email address
 - `forwardRepliesTo` (optional) - when set alongside `captureReplies`, forwards captured replies to this email address via SES. The `From:` header is rewritten to the verified `replyToEmail` with `Reply-To:` set to the original sender, so you can reply directly back
+- `listUnsubscribe` (optional, default: `true`) - when `false`, omits `List-Unsubscribe` and `List-Unsubscribe-Post` headers. Use for cold outreach where these headers signal bulk mail to Gmail. The `unsubscribeUrl` template variable is still available for in-body links
 
 Sender config is baked into Step Functions payloads at deploy time (static, not dynamic). The SendEmailFn reads `sender` from the event payload, not from environment variables. There are no project-level sender defaults — every sequence must define its own.
+
+### A/B testing
+
+Send steps support `variants` for A/B testing. Instead of a single `templateKey`/`subject`, provide an array of variants:
+
+```typescript
+{
+  type: "send",
+  variants: [
+    { templateKey: "onboarding/welcome-a", subject: "Welcome aboard!" },
+    { templateKey: "onboarding/welcome-b", subject: "Hey, welcome!" },
+  ],
+}
+```
+
+Variant assignment is deterministic — `SHA-256(email + sequenceId)` picks the same variant for a subscriber across all steps in a sequence. Each variant uses a distinct `templateKey`, so engagement stats (opens, clicks, bounces) are automatically tracked per variant via the existing `TemplateIndex` GSI on the Events table.
 
 ## Key Conventions
 

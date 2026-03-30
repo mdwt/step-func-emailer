@@ -1,5 +1,11 @@
 # @mailshot/shared
 
+## 1.5.0
+
+### Minor Changes
+
+- Add A/B testing via variants on send steps and remove text/plain MIME part
+
 ## 1.4.0
 
 ### Minor Changes

@@ -62,8 +62,9 @@ export interface RegisterInput {
 
 export interface SendInput {
   action: "send";
-  templateKey: string;
-  subject: string;
+  templateKey?: string;
+  subject?: string;
+  variants?: SendVariant[];
   sequenceId?: string;
   subscriber: Subscriber;
   sender?: SenderConfig;
@@ -158,10 +159,16 @@ export interface SequenceTrigger {
 }
 
 // Step types
+export interface SendVariant {
+  templateKey: string; // S3 path e.g. "onboarding/welcome-a"
+  subject: string;
+}
+
 export interface SendStep {
   type: "send";
-  templateKey: string; // S3 path e.g. "onboarding/welcome"
-  subject: string;
+  templateKey?: string; // S3 path — required unless variants is set
+  subject?: string; // required unless variants is set
+  variants?: SendVariant[]; // A/B variants (2+), mutually exclusive with templateKey/subject
 }
 
 export interface WaitStep {
@@ -217,6 +224,7 @@ export interface SenderConfig {
   replyToEmail?: string; // Reply-To header
   captureReplies?: boolean; // If true, create SES receipt rule for replyToEmail
   forwardRepliesTo?: string; // Forward captured replies to this email address
+  listUnsubscribe?: boolean; // Include List-Unsubscribe headers (default: true)
 }
 
 export interface SequenceDefinition {

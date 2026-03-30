@@ -1,5 +1,5 @@
 ---
-description: Create a new email sequence with templates and config. Use when the user wants to create, add, build, or set up a new email sequence, drip campaign, onboarding flow, or any series of automated emails. Trigger phrases: "create a sequence", "add a sequence", "new sequence", "build an email flow", "set up emails", "I want to create a sequence", "make a drip campaign".
+description: Create a new email sequence with templates and config. Use when the user wants to create, add, build, or set up a new email sequence, drip campaign, onboarding flow, A/B test, or any series of automated emails. Trigger phrases: "create a sequence", "add a sequence", "new sequence", "build an email flow", "set up emails", "I want to create a sequence", "make a drip campaign", "A/B test", "split test", "test variants".
 ---
 
 # Create Sequence
@@ -32,6 +32,11 @@ Extract from the user's description:
   - `previewText` - preview/preheader text
   - `body` - paragraphs and content for the email body
   - `delayBefore` - delay before this email (`0` for immediate, or e.g. `2 days`, `1 week`)
+- **variants** (optional) - A/B testing. If the user mentions "A/B test", "split test", "variants", "test different subjects/content", extract:
+  - Which emails have variants (some or all)
+  - How many variants per email (typically 2, but can be more)
+  - What differs between variants (subject, body content, or both)
+  - Variant naming convention: use `-a`, `-b`, `-c` suffixes on templateKey (e.g., `welcome-a`, `welcome-b`)
 - **branching** (optional) - any choice/condition logic (e.g., "different welcome email per platform", "skip if already sent")
 - **events** (optional) - one-off fire-and-forget emails triggered by events during the sequence (e.g., "send congrats on first sale")
 - **sender** - the sending configuration for this sequence:
@@ -39,8 +44,10 @@ Extract from the user's description:
   - `fromName` - the display name shown in the "From" field
   - `replyToEmail` (optional) - the Reply-To address. Can be a normal email or an SES-managed inbox
   - `captureReplies` (optional) - set to `true` if `replyToEmail` is an SES-managed inbox where inbound replies should be captured via SES receipt rules → SNS → Lambda (e.g., for cold outreach). Leave unset for normal email reply-to addresses
+  - `forwardRepliesTo` (optional) - when set alongside `captureReplies`, forwards captured replies to this email address so the user can read and respond to them
+  - `listUnsubscribe` (optional, default: `true`) - set to `false` to omit `List-Unsubscribe` and `List-Unsubscribe-Post` headers. Use for cold outreach where these headers signal bulk mail to Gmail
 
-Ask the user what type of sequence this is (e.g., transactional, marketing, cold outreach). If cold outreach or the user wants a managed inbox for reply tracking, set `captureReplies: true` and confirm the SES inbound email address.
+Ask the user what type of sequence this is (e.g., transactional, marketing, cold outreach). If cold outreach or the user wants a managed inbox for reply tracking, set `captureReplies: true` and confirm the SES inbound email address. For cold outreach, also set `listUnsubscribe: false` to avoid bulk mail filtering.
 
 If any of these are missing or ambiguous, ask the user to clarify before generating code. Present your parsed interpretation to the user and confirm before proceeding.
 
@@ -115,6 +122,8 @@ export default {
     fromName: "<fromName>",
     replyToEmail: "<replyToEmail>", // optional
     // captureReplies: true,              // optional, for SES managed inbox
+    // forwardRepliesTo: "team@example.com", // optional, forward replies to inbox
+    // listUnsubscribe: false,               // optional, omit List-Unsubscribe headers
   },
   trigger: {
     detailType: "<triggerEvent>",
@@ -126,7 +135,17 @@ export default {
   },
   timeoutMinutes: 43200,
   steps: [
-    // ... step objects (see below)
+    // Standard send step:
+    // { type: "send", templateKey: `${id}/<templateName>`, subject: "..." },
+    //
+    // A/B variant send step:
+    // {
+    //   type: "send",
+    //   variants: [
+    //     { templateKey: `${id}/<templateName>-a`, subject: "Subject A" },
+    //     { templateKey: `${id}/<templateName>-b`, subject: "Subject B" },
+    //   ],
+    // },
   ],
   // Optional: fire-and-forget emails triggered by events during the sequence
   events: [
@@ -145,6 +164,18 @@ export default {
 
 ```typescript
 { type: "send", templateKey: `${id}/<templateName>`, subject: "..." }
+```
+
+**Send with A/B variants** - provide an array of variants instead of a single templateKey/subject. Variant assignment is deterministic per subscriber per sequence (same subscriber always gets the same variant across all steps):
+
+```typescript
+{
+  type: "send",
+  variants: [
+    { templateKey: `${id}/<templateName>-a`, subject: "Subject A" },
+    { templateKey: `${id}/<templateName>-b`, subject: "Subject B" },
+  ],
+}
 ```
 
 **Wait** - pauses the Step Function execution:
@@ -194,6 +225,13 @@ Available checks:
 ### Step 4: Generate React Email templates
 
 For each email, create a file at `sequences/<sequenceId>/src/emails/<templateName>.tsx`.
+
+**For A/B variant emails:** Create a separate template file for each variant. For example, if a send step has variants `welcome-a` and `welcome-b`, create:
+
+- `sequences/<sequenceId>/src/emails/welcome-a.tsx`
+- `sequences/<sequenceId>/src/emails/welcome-b.tsx`
+
+Each variant template is a standalone file with its own subject, heading, body content, etc. Make the differences between variants meaningful and testable (e.g., different headline copy, different CTA text, different tone).
 
 If using React Email:
 

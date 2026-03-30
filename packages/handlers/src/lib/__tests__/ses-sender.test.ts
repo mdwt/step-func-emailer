@@ -64,6 +64,21 @@ describe("sendEmail", () => {
     });
   });
 
+  it("omits List-Unsubscribe headers when listUnsubscribe is false", async () => {
+    mockSend.mockResolvedValueOnce({ MessageId: "msg-1" });
+
+    await sendEmail({ ...defaultParams, listUnsubscribe: false });
+
+    const cmd = mockSend.mock.calls[0][0];
+    const headers = cmd.input.Content.Simple.Headers;
+    expect(headers).not.toContainEqual(expect.objectContaining({ Name: "List-Unsubscribe" }));
+    expect(headers).not.toContainEqual(expect.objectContaining({ Name: "List-Unsubscribe-Post" }));
+    expect(headers).toContainEqual({
+      Name: "X-Template-Key",
+      Value: defaultParams.templateKey,
+    });
+  });
+
   it("sets correct destination and from address", async () => {
     mockSend.mockResolvedValueOnce({ MessageId: "msg-1" });
 
@@ -72,6 +87,17 @@ describe("sendEmail", () => {
     const cmd = mockSend.mock.calls[0][0];
     expect(cmd.input.FromEmailAddress).toBe(defaultParams.from);
     expect(cmd.input.Destination.ToAddresses).toEqual([defaultParams.to]);
+  });
+
+  it("sends HTML-only without text/plain part", async () => {
+    mockSend.mockResolvedValueOnce({ MessageId: "msg-1" });
+
+    await sendEmail(defaultParams);
+
+    const cmd = mockSend.mock.calls[0][0];
+    const body = cmd.input.Content.Simple.Body;
+    expect(body.Html).toBeDefined();
+    expect(body.Text).toBeUndefined();
   });
 
   it("uses the configuration set name", async () => {

@@ -177,6 +177,70 @@ This is useful for cold outreach sequences - when someone replies, you probably 
 
 To also receive replies in your real inbox, add `forwardRepliesTo` to your sender config. See [Forwarding replies to your inbox](/docs/events#forwarding-replies-to-your-inbox) for details.
 
+## Disabling List-Unsubscribe headers
+
+By default, every email includes `List-Unsubscribe` and `List-Unsubscribe-Post` headers for one-click unsubscribe. Gmail and other providers use these headers to identify bulk/marketing mail and may filter more aggressively — especially from new domains with little sending reputation.
+
+For cold outreach sequences where emails should appear personal rather than automated, disable these headers by setting `listUnsubscribe: false` in your sender config:
+
+```typescript
+sender: {
+  fromEmail: "you@yourdomain.com",
+  fromName: "Your Name",
+  listUnsubscribe: false,
+},
+```
+
+The `{{ unsubscribeUrl }}` template variable is still available when headers are disabled, so you can include an unsubscribe link in the email body if needed.
+
+## A/B testing
+
+Send steps support `variants` for A/B testing different subjects, headings, and content. Instead of a single `templateKey` and `subject`, provide an array of variants:
+
+```typescript
+steps: [
+  {
+    type: "send",
+    variants: [
+      { templateKey: "onboarding/welcome-a", subject: "Welcome aboard!" },
+      { templateKey: "onboarding/welcome-b", subject: "Hey, welcome!" },
+    ],
+  },
+  { type: "wait", days: 2 },
+  {
+    type: "send",
+    variants: [
+      { templateKey: "onboarding/tips-a", subject: "Quick tips to get started" },
+      { templateKey: "onboarding/tips-b", subject: "3 things you should try" },
+    ],
+  },
+]
+```
+
+### How variant assignment works
+
+Variant selection is **deterministic** — a SHA-256 hash of `email + sequenceId` picks the variant index. This means:
+
+- The same subscriber always gets the same variant across all steps in a sequence
+- Different sequences get independent randomization
+- No extra storage or state is needed
+
+### Tracking results
+
+Each variant uses a distinct `templateKey`, so engagement stats (opens, clicks, bounces) are automatically tracked per variant through the existing pipeline:
+
+1. SES tags each email with the variant's `templateKey` via custom headers
+2. EngagementHandlerFn writes events to the Events table with that `templateKey`
+3. Query the `TemplateIndex` GSI to compare metrics across variants
+
+For example, to compare open rates between `onboarding/welcome-a` and `onboarding/welcome-b`, query the Events table's `TemplateIndex` GSI for each template key and filter by `eventType = "open"`.
+
+### Validation rules
+
+- A send step must have either `templateKey` + `subject` OR `variants` (not both)
+- `variants` must have at least 2 entries
+- Each variant must specify both `templateKey` and `subject`
+
 ## Auto-discovery
 
 CDK scans `sequences/*/sequence.config.ts` at deploy time. You never need to manually register a sequence - just create the folder and deploy. The CDK constructs automatically:

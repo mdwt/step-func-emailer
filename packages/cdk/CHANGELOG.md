@@ -1,5 +1,17 @@
 # @mailshot/cdk
 
+## 1.5.0
+
+### Minor Changes
+
+- Add A/B testing via variants on send steps and remove text/plain MIME part
+
+### Patch Changes
+
+- Updated dependencies []:
+  - @mailshot/shared@1.5.0
+  - @mailshot/handlers@1.5.0
+
 ## 1.4.0
 
 ### Minor Changes

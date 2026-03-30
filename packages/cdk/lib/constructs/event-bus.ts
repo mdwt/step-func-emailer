@@ -96,6 +96,7 @@ export class EventBusConstruct extends Construct {
                     fromEmail: def.sender.fromEmail,
                     fromName: def.sender.fromName,
                     ...(def.sender.replyToEmail && { replyToEmail: def.sender.replyToEmail }),
+                    ...(def.sender.listUnsubscribe === false && { listUnsubscribe: false }),
                   },
                   subscriber: evtSubscriber,
                 }),

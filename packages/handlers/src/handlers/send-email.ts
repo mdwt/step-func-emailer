@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { SFNClient, StopExecutionCommand } from "@aws-sdk/client-sfn";
 import type { SendEmailInput, RegisterOutput, SendOutput } from "@mailshot/shared";
 import { resolveConfig } from "../lib/config.js";
@@ -131,10 +132,25 @@ async function handleSend(
   config: ReturnType<typeof resolveConfig>,
   sequenceId: string = "unknown",
 ): Promise<SendOutput> {
+  // Resolve A/B variant if present
+  let templateKey = event.templateKey ?? "";
+  let subject = event.subject ?? "";
+  if (event.variants?.length) {
+    const index = selectVariant(event.subscriber.email, sequenceId, event.variants.length);
+    templateKey = event.variants[index].templateKey;
+    subject = event.variants[index].subject;
+    logger.info("Selected A/B variant", {
+      email: event.subscriber.email,
+      variantIndex: index,
+      templateKey,
+      subject,
+    });
+  }
+
   logger.info("Processing send", {
     email: event.subscriber.email,
-    templateKey: event.templateKey,
-    subject: event.subject,
+    templateKey,
+    subject,
     sequenceId,
   });
 
@@ -169,7 +185,7 @@ async function handleSend(
 
   const htmlBody = await renderTemplate(
     config.templateBucket,
-    event.templateKey,
+    templateKey,
     context as Parameters<typeof renderTemplate>[2],
   );
 
@@ -184,22 +200,23 @@ async function handleSend(
   const messageId = await sendEmail({
     from: fromAddress,
     to: event.subscriber.email,
-    subject: event.subject,
+    subject,
     htmlBody,
     configurationSetName: config.sesConfigSet,
     unsubscribeUrl,
     replyToAddress: sender.replyToEmail || undefined,
-    templateKey: event.templateKey,
+    templateKey,
     sequenceId,
+    listUnsubscribe: sender.listUnsubscribe,
   });
 
   await writeSendLog(
     config.tableName,
     event.subscriber.email,
     {
-      templateKey: event.templateKey,
+      templateKey,
       sequenceId,
-      subject: event.subject,
+      subject,
       sesMessageId: messageId,
     },
     config.dataTtlDays,
@@ -207,9 +224,14 @@ async function handleSend(
 
   logger.info("Send complete", {
     email: event.subscriber.email,
-    templateKey: event.templateKey,
+    templateKey,
     messageId,
     sequenceId,
   });
   return { sent: true, messageId };
+}
+
+function selectVariant(email: string, sequenceId: string, count: number): number {
+  const hash = createHash("sha256").update(`${email}:${sequenceId}`).digest();
+  return hash.readUInt32BE(0) % count;
 }

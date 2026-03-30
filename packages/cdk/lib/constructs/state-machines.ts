@@ -185,8 +185,9 @@ export class StateMachinesConstruct extends Construct {
       lambdaFunction: sendEmailFn,
       payload: sfn.TaskInput.fromObject({
         action: "send",
-        templateKey: step.templateKey,
-        subject: step.subject,
+        ...(step.variants
+          ? { variants: step.variants }
+          : { templateKey: step.templateKey, subject: step.subject }),
         sequenceId,
         sender,
         "subscriber.$": "$.subscriber",

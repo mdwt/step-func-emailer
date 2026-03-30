@@ -266,6 +266,18 @@ describe("send-email handler", () => {
       const sendCall = mockSendEmail.mock.calls[0][0];
       expect(sendCall.unsubscribeUrl).toBe("https://unsub.example.com?token=token-abc");
     });
+
+    it("passes listUnsubscribe to sendEmail when sender disables it", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce(null);
+
+      await handler({
+        ...sendEvent,
+        sender: { ...TEST_SENDER, listUnsubscribe: false },
+      });
+
+      const sendCall = mockSendEmail.mock.calls[0][0];
+      expect(sendCall.listUnsubscribe).toBe(false);
+    });
   });
 
   describe("fire_and_forget action", () => {
@@ -283,6 +295,69 @@ describe("send-email handler", () => {
       expect(result).toEqual({ sent: true, messageId: "msg-123" });
       expect(mockUpsertSubscriberProfile).toHaveBeenCalled();
       expect(mockSendEmail).toHaveBeenCalled();
+    });
+  });
+
+  describe("A/B variants", () => {
+    const variantEvent = {
+      action: "send" as const,
+      variants: [
+        { templateKey: "onboarding/welcome-a", subject: "Welcome A!" },
+        { templateKey: "onboarding/welcome-b", subject: "Welcome B!" },
+      ],
+      sequenceId: "onboarding",
+      subscriber: { email: "user@example.com", firstName: "Jane" },
+      sender: TEST_SENDER,
+    };
+
+    it("sends with selected variant templateKey and subject", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce(null);
+
+      const result = await handler(variantEvent);
+
+      expect(result).toEqual({ sent: true, messageId: "msg-123" });
+      const sendCall = mockSendEmail.mock.calls[0][0];
+      // Should use one of the variant templateKeys
+      expect(["onboarding/welcome-a", "onboarding/welcome-b"]).toContain(sendCall.templateKey);
+      expect(["Welcome A!", "Welcome B!"]).toContain(sendCall.subject);
+    });
+
+    it("selects the same variant deterministically for the same subscriber", async () => {
+      mockGetSubscriberProfile.mockResolvedValue(null);
+
+      await handler(variantEvent);
+      const firstTemplateKey = mockSendEmail.mock.calls[0][0].templateKey;
+
+      mockSendEmail.mockClear();
+      await handler(variantEvent);
+      const secondTemplateKey = mockSendEmail.mock.calls[0][0].templateKey;
+
+      expect(firstTemplateKey).toBe(secondTemplateKey);
+    });
+
+    it("writes send log with the variant templateKey", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce(null);
+
+      await handler(variantEvent);
+
+      const logCall = mockWriteSendLog.mock.calls[0];
+      expect(["onboarding/welcome-a", "onboarding/welcome-b"]).toContain(logCall[2].templateKey);
+    });
+
+    it("uses direct templateKey/subject when no variants", async () => {
+      mockGetSubscriberProfile.mockResolvedValueOnce(null);
+
+      await handler({
+        action: "send" as const,
+        templateKey: "onboarding/welcome",
+        subject: "Welcome!",
+        subscriber: { email: "user@example.com", firstName: "Jane" },
+        sender: TEST_SENDER,
+      });
+
+      const sendCall = mockSendEmail.mock.calls[0][0];
+      expect(sendCall.templateKey).toBe("onboarding/welcome");
+      expect(sendCall.subject).toBe("Welcome!");
     });
   });
 

@@ -1,6 +1,6 @@
 import * as fs from "node:fs";
 import * as path from "node:path";
-import type { SequenceDefinition } from "@mailshot/shared";
+import type { SequenceDefinition, SequenceStep } from "@mailshot/shared";
 
 /**
  * Scans sequences/ * /sequence.config.ts and loads each definition.
@@ -50,8 +50,46 @@ export function loadSequenceConfigs(sequencesDir?: string): SequenceDefinition[]
       throw new Error(`${configPath}: 'sender.captureReplies' requires 'sender.replyToEmail'`);
     }
 
+    validateSteps(def.steps, configPath);
     definitions.push(def);
   }
 
   return definitions;
+}
+
+function validateSteps(steps: SequenceStep[], configPath: string): void {
+  for (const step of steps) {
+    if (step.type === "send") {
+      const hasVariants = step.variants && step.variants.length > 0;
+      const hasDirect = step.templateKey && step.subject;
+      if (hasVariants && hasDirect) {
+        throw new Error(
+          `${configPath}: send step cannot have both 'templateKey'/'subject' and 'variants'`,
+        );
+      }
+      if (!hasVariants && !hasDirect) {
+        throw new Error(
+          `${configPath}: send step must have either 'templateKey'+'subject' or 'variants'`,
+        );
+      }
+      if (hasVariants) {
+        if (step.variants!.length < 2) {
+          throw new Error(`${configPath}: 'variants' must have at least 2 entries`);
+        }
+        for (const v of step.variants!) {
+          if (!v.templateKey || !v.subject) {
+            throw new Error(`${configPath}: each variant must have 'templateKey' and 'subject'`);
+          }
+        }
+      }
+    } else if (step.type === "condition") {
+      validateSteps(step.then, configPath);
+      if (step.else) validateSteps(step.else, configPath);
+    } else if (step.type === "choice") {
+      for (const branch of step.branches) {
+        validateSteps(branch.steps, configPath);
+      }
+      if (step.default) validateSteps(step.default, configPath);
+    }
+  }
 }
