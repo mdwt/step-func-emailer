@@ -11,7 +11,7 @@ import {
   deleteExecution,
   writeSendLog,
 } from "../lib/dynamo-client.js";
-import { renderTemplate } from "../lib/template-renderer.js";
+import { renderTemplate, renderString } from "../lib/template-renderer.js";
 import { sendEmail } from "../lib/ses-sender.js";
 import { generateToken } from "../lib/unsubscribe-token.js";
 import { loadDisplayNames, resolveDisplayNames } from "../lib/display-names.js";
@@ -183,11 +183,9 @@ async function handleSend(
     currentYear: new Date().getFullYear(),
   };
 
-  const htmlBody = await renderTemplate(
-    config.templateBucket,
-    templateKey,
-    context as Parameters<typeof renderTemplate>[2],
-  );
+  const renderContext = context as Parameters<typeof renderTemplate>[2];
+  const htmlBody = await renderTemplate(config.templateBucket, templateKey, renderContext);
+  const renderedSubject = await renderString(subject, renderContext);
 
   const sender = event.sender;
   if (!sender?.fromEmail) {
@@ -200,7 +198,7 @@ async function handleSend(
   const messageId = await sendEmail({
     from: fromAddress,
     to: event.subscriber.email,
-    subject,
+    subject: renderedSubject,
     htmlBody,
     configurationSetName: config.sesConfigSet,
     unsubscribeUrl,
@@ -216,7 +214,7 @@ async function handleSend(
     {
       templateKey,
       sequenceId,
-      subject,
+      subject: renderedSubject,
       sesMessageId: messageId,
     },
     config.dataTtlDays,

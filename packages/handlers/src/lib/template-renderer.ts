@@ -39,6 +39,10 @@ export interface RenderContext {
   [key: string]: unknown;
 }
 
+export async function renderString(template: string, context: RenderContext): Promise<string> {
+  return liquid.parseAndRender(template, context);
+}
+
 export async function renderTemplate(
   bucket: string,
   templateKey: string,

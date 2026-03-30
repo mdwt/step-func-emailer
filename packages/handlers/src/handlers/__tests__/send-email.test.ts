@@ -58,6 +58,7 @@ vi.mock("../../lib/dynamo-client.js", () => ({
 
 vi.mock("../../lib/template-renderer.js", () => ({
   renderTemplate: (...args: unknown[]) => mockRenderTemplate(...args),
+  renderString: (template: string) => Promise.resolve(template),
 }));
 
 vi.mock("../../lib/ses-sender.js", () => ({

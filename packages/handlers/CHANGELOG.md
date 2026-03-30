@@ -1,5 +1,11 @@
 # @mailshot/handlers
 
+## 1.5.1
+
+### Patch Changes
+
+- Render subject lines through LiquidJS for dynamic variables like {{ firstName }}
+
 ## 1.5.0
 
 ### Minor Changes

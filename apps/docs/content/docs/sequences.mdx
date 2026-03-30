@@ -64,6 +64,10 @@ Invokes SendEmailFn to deliver an email:
 ```
 
 - `templateKey` maps to an S3 path: `s3://bucket/onboarding/welcome.html`
+- Subject lines support Liquid variables — use `{{ firstName }}`, `{{ currentYear }}`, or any subscriber attribute:
+  ```typescript
+  { type: "send", templateKey: "onboarding/welcome", subject: "Hey {{ firstName }}, welcome!" }
+  ```
 - Pre-send checks run automatically (unsubscribed, suppressed). If a check fails, the step returns `{ sent: false }` and the sequence continues - it does not throw.
 
 ### Wait
