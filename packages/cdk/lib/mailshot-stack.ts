@@ -159,6 +159,8 @@ export class MailshotStack extends cdk.Stack {
       stateMachines: stateMachines.stateMachines,
       sendEmailFn: lambdas.sendEmailFn,
       sequenceExitFn: lambdas.sequenceExitFn,
+      subscribeFn: lambdas.subscribeFn,
+      broadcastFn: lambdas.broadcastFn,
     });
 
     // ── Outputs ──────────────────────────────────────────────────────────

@@ -9,6 +9,11 @@ export const sentSK = (isoTimestamp: string): string => `${SENT_SK_PREFIX}${isoT
 
 export const TEMPLATE_CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
 
+// ── Tags (inverted index) ─────────────────────────────────────────────────
+
+export const TAG_PK_PREFIX = "TAG#" as const;
+export const tagPK = (tag: string): string => `${TAG_PK_PREFIX}${tag}`;
+
 // ── Events table ───────────────────────────────────────────────────────────
 
 export const EVT_SK_PREFIX = "EVT#" as const;

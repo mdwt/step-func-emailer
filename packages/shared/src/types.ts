@@ -4,6 +4,7 @@ export interface Subscriber {
   email: string;
   firstName: string;
   attributes?: Record<string, unknown>;
+  tags?: string[];
 }
 
 export interface SubscriberProfile {
@@ -76,6 +77,7 @@ export interface FireAndForgetInput {
   subject: string;
   subscriber: Subscriber;
   sender?: SenderConfig;
+  sequenceId?: string; // override "fire_and_forget" default, e.g. broadcastId
 }
 
 export interface CompleteInput {
@@ -235,6 +237,36 @@ export interface SequenceDefinition {
   steps: SequenceStep[];
   events?: EventEmail[]; // fire-and-forget emails triggered by events
   exitOn?: ExitEvent[]; // exit subscriber from this sequence on these events
+}
+
+// ── Subscribe input ────────────────────────────────────────────────────────
+
+export interface SubscribeInput {
+  subscriber: Subscriber;
+}
+
+// ── Broadcast ──────────────────────────────────────────────────────────────
+
+export interface BroadcastFilters {
+  tags?: string[]; // AND: subscriber must have ALL listed tags
+  attributes?: Record<string, unknown>; // equality match on subscriber attributes
+}
+
+export interface BroadcastInput {
+  broadcastId: string;
+  templateKey: string;
+  subject: string;
+  sender: SenderConfig;
+  filters?: BroadcastFilters;
+}
+
+// ── Tag item (inverted index) ──────────────────────────────────────────────
+
+export interface TagItem {
+  PK: string; // TAG#<tagName>
+  SK: string; // SUB#<email>
+  email: string;
+  taggedAt: string;
 }
 
 // ── CDK context config ──────────────────────────────────────────────────────
