@@ -340,7 +340,7 @@ server.registerTool(
   "send_broadcast",
   {
     description:
-      "Send a one-off broadcast email to filtered subscribers. Invokes BroadcastFn directly to resolve subscribers and fan out via SQS. Returns subscriber count and messages queued.",
+      "Send a one-off broadcast email to filtered subscribers. Invokes BroadcastFn directly to resolve subscribers and fan out via SQS. Use dryRun to preview audience size without sending.",
     inputSchema: {
       broadcastId: z.string().describe("Unique broadcast identifier (kebab-case)"),
       templateKey: z.string().describe("S3 template key (e.g., broadcasts/product-update)"),
@@ -361,6 +361,11 @@ server.registerTool(
         .record(z.unknown())
         .optional()
         .describe("Attribute equality filters on subscriber profiles"),
+      dryRun: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe("When true, resolves subscribers and returns count without sending"),
     },
   },
   async ({
@@ -373,6 +378,7 @@ server.registerTool(
     listUnsubscribe,
     filterTags,
     filterAttributes,
+    dryRun,
   }) => ({
     content: [
       {
@@ -388,6 +394,7 @@ server.registerTool(
             listUnsubscribe,
             filterTags,
             filterAttributes,
+            dryRun,
           }),
           null,
           2,

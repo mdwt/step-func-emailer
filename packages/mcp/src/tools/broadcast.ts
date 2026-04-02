@@ -27,6 +27,7 @@ export interface SendBroadcastParams {
   listUnsubscribe?: boolean;
   filterTags?: string[];
   filterAttributes?: Record<string, unknown>;
+  dryRun?: boolean;
 }
 
 export async function sendBroadcast(config: McpConfig, params: SendBroadcastParams) {
@@ -53,6 +54,9 @@ export async function sendBroadcast(config: McpConfig, params: SendBroadcastPara
   }
   if (Object.keys(filters).length > 0) {
     payload.filters = filters;
+  }
+  if (params.dryRun) {
+    payload.dryRun = true;
   }
 
   const result = await client.send(

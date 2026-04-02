@@ -86,7 +86,7 @@ describe("broadcast handler", () => {
     });
 
     expect(result.subscriberCount).toBe(2);
-    expect(result.messagesQueued).toBe(2);
+    expect(result.dryRun).toBe(false);
     expect(mockGetSubscriberEmailsByTag).toHaveBeenCalledWith("TestTable", "product-updates");
     expect(mockSqsSend).toHaveBeenCalledTimes(1);
   });
@@ -117,7 +117,7 @@ describe("broadcast handler", () => {
     });
 
     expect(result.subscriberCount).toBe(1);
-    expect(result.messagesQueued).toBe(1);
+    expect(result.dryRun).toBe(false);
   });
 
   it("intersects multiple tags (AND logic)", async () => {
@@ -178,12 +178,15 @@ describe("broadcast handler", () => {
     });
 
     expect(result.subscriberCount).toBe(0);
-    expect(result.messagesQueued).toBe(0);
+    expect(result.dryRun).toBe(false);
     expect(mockSqsSend).not.toHaveBeenCalled();
   });
 
   it("throws when BROADCAST_QUEUE_URL is not set", async () => {
     delete process.env.BROADCAST_QUEUE_URL;
+    mockScanActiveSubscribers.mockResolvedValueOnce([
+      { email: "a@example.com", firstName: "A", unsubscribed: false, suppressed: false },
+    ]);
 
     await expect(
       handler({

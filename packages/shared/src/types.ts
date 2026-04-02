@@ -258,6 +258,7 @@ export interface BroadcastInput {
   subject: string;
   sender: SenderConfig;
   filters?: BroadcastFilters;
+  dryRun?: boolean;
 }
 
 // ── Broadcast record (persisted log) ────────────────────────────────────────
@@ -271,7 +272,6 @@ export interface BroadcastRecord {
   sender: SenderConfig;
   filters?: BroadcastFilters;
   subscriberCount: number;
-  messagesQueued: number;
   sentAt: string; // ISO timestamp
 }
 

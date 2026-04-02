@@ -534,7 +534,6 @@ export async function writeBroadcastRecord(
     sender: SenderConfig;
     filters?: BroadcastFilters;
     subscriberCount: number;
-    messagesQueued: number;
   },
 ): Promise<void> {
   logger.info("Writing broadcast record", {
@@ -555,7 +554,6 @@ export async function writeBroadcastRecord(
           sender: params.sender,
           filters: params.filters,
           subscriberCount: params.subscriberCount,
-          messagesQueued: params.messagesQueued,
           sentAt,
         },
         { removeUndefinedValues: true },

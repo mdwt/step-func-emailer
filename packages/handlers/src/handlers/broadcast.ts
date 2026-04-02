@@ -16,7 +16,7 @@ const sqs = new SQSClient({});
 interface BroadcastResult {
   broadcastId: string;
   subscriberCount: number;
-  messagesQueued: number;
+  dryRun: boolean;
 }
 
 export const handler = async (event: BroadcastInput): Promise<BroadcastResult> => {
@@ -24,13 +24,10 @@ export const handler = async (event: BroadcastInput): Promise<BroadcastResult> =
     broadcastId: event.broadcastId,
     templateKey: event.templateKey,
     filters: event.filters,
+    dryRun: event.dryRun ?? false,
   });
 
   const config = resolveConfig();
-  const queueUrl = process.env.BROADCAST_QUEUE_URL;
-  if (!queueUrl) {
-    throw new Error("BROADCAST_QUEUE_URL environment variable is required");
-  }
 
   // ── Build subscriber list ──────────────────────────────────────────────
   const subscribers = await resolveSubscribers(config.tableName, event);
@@ -40,6 +37,10 @@ export const handler = async (event: BroadcastInput): Promise<BroadcastResult> =
     count: subscribers.length,
   });
 
+  if (event.dryRun) {
+    return { broadcastId: event.broadcastId, subscriberCount: subscribers.length, dryRun: true };
+  }
+
   if (subscribers.length === 0) {
     await writeBroadcastRecord(config.tableName, {
       broadcastId: event.broadcastId,
@@ -48,13 +49,16 @@ export const handler = async (event: BroadcastInput): Promise<BroadcastResult> =
       sender: event.sender,
       filters: event.filters,
       subscriberCount: 0,
-      messagesQueued: 0,
     });
-    return { broadcastId: event.broadcastId, subscriberCount: 0, messagesQueued: 0 };
+    return { broadcastId: event.broadcastId, subscriberCount: 0, dryRun: false };
   }
 
   // ── Fan out via SQS ────────────────────────────────────────────────────
-  let messagesQueued = 0;
+  const queueUrl = process.env.BROADCAST_QUEUE_URL;
+  if (!queueUrl) {
+    throw new Error("BROADCAST_QUEUE_URL environment variable is required");
+  }
+
   const batchSize = 10; // SQS SendMessageBatch max
 
   for (let i = 0; i < subscribers.length; i += batchSize) {
@@ -85,7 +89,6 @@ export const handler = async (event: BroadcastInput): Promise<BroadcastResult> =
         Entries: entries,
       }),
     );
-    messagesQueued += entries.length;
   }
 
   // ── Write broadcast record ──────────────────────────────────────────────
@@ -96,19 +99,17 @@ export const handler = async (event: BroadcastInput): Promise<BroadcastResult> =
     sender: event.sender,
     filters: event.filters,
     subscriberCount: subscribers.length,
-    messagesQueued,
   });
 
-  logger.info("Broadcast queued", {
+  logger.info("Broadcast sent", {
     broadcastId: event.broadcastId,
     subscriberCount: subscribers.length,
-    messagesQueued,
   });
 
   return {
     broadcastId: event.broadcastId,
     subscriberCount: subscribers.length,
-    messagesQueued,
+    dryRun: false,
   };
 };
 
