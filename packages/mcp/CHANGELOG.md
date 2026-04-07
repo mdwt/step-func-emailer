@@ -1,5 +1,16 @@
 # @mailshot/mcp
 
+## 1.6.0
+
+### Minor Changes
+
+- [`53115a3`](https://github.com/mdwt/mailshot/commit/53115a3bd4a905c097923873261006e390978f14) Thanks [@mdwt](https://github.com/mdwt)! - Rename `BroadcastRecord.subscriberCount` to `audienceSize` and add live engagement counters (`deliveryCount`, `openCount`, `clickCount`, `bounceCount`, `complaintCount`) maintained on a separate `STATS#<sequenceId>/COUNTERS` item by `EngagementHandlerFn`. Counters are merged into `get_broadcast` and `list_broadcasts` responses automatically. The same item also accumulates lifetime stats for sequences as a side benefit.
+
+### Patch Changes
+
+- Updated dependencies [[`ab62305`](https://github.com/mdwt/mailshot/commit/ab62305303faa30847d9210749ab78953060f5c8), [`53115a3`](https://github.com/mdwt/mailshot/commit/53115a3bd4a905c097923873261006e390978f14)]:
+  - @mailshot/shared@1.6.0
+
 ## 1.5.0
 
 ### Patch Changes
