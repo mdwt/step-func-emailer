@@ -57,12 +57,12 @@ build/              Generated artifacts (gitignored)
 
 ## Commands
 
-| Command                              | What it does                                     |
-| ------------------------------------ | ------------------------------------------------ |
-| `pnpm build`                         | Build all sequences (compile + render templates) |
-| `npx cdk synth`                      | Synthesize CloudFormation template               |
-| `npx cdk deploy`                     | Deploy everything to AWS                         |
-| `pnpm --filter @mailshot/<name> dev` | React Email dev server for a sequence            |
+| Command                    | What it does                                     |
+| -------------------------- | ------------------------------------------------ |
+| `pnpm build`               | Build all sequences (compile + render templates) |
+| `npx cdk synth`            | Synthesize CloudFormation template               |
+| `npx cdk deploy`           | Deploy everything to AWS                         |
+| `pnpm --filter <name> dev` | React Email dev server for a sequence            |
 
 ## MCP tools
 
