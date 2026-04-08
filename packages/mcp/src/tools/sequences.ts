@@ -10,6 +10,8 @@ import {
   DescribeRuleCommand,
   ListTargetsByRuleCommand,
 } from "@aws-sdk/client-eventbridge";
+import { DynamoDBClient, QueryCommand } from "@aws-sdk/client-dynamodb";
+import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
 import type {
   SequenceDefinition,
   SequenceStep,
@@ -22,6 +24,7 @@ import type { McpConfig } from "../config.js";
 let s3: S3Client;
 let sfn: SFNClient;
 let eb: EventBridgeClient;
+let dynamo: DynamoDBClient;
 
 function getS3(region: string): S3Client {
   if (!s3) s3 = new S3Client({ region });
@@ -36,6 +39,11 @@ function getSfn(region: string): SFNClient {
 function getEb(region: string): EventBridgeClient {
   if (!eb) eb = new EventBridgeClient({ region });
   return eb;
+}
+
+function getDynamo(region: string): DynamoDBClient {
+  if (!dynamo) dynamo = new DynamoDBClient({ region });
+  return dynamo;
 }
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -269,11 +277,19 @@ export interface SequenceInfo {
   sequenceId: string;
   stateMachineArn?: string;
   templateKeys: string[];
+  activeExecutionCount: number;
+}
+
+export interface SequenceSubscriber {
+  email: string;
+  executionArn: string;
+  startedAt: string;
 }
 
 export async function listSequences(config: McpConfig): Promise<SequenceInfo[]> {
   const s3Client = getS3(config.region);
   const sfnClient = getSfn(config.region);
+  const dynamoClient = getDynamo(config.region);
 
   // 1. S3 bucket prefixes → sequence IDs
   const s3Result = await s3Client.send(
@@ -327,10 +343,66 @@ export async function listSequences(config: McpConfig): Promise<SequenceInfo[]> 
       sequenceId,
       stateMachineArn: smMap.get(sequenceId),
       templateKeys: s3Sequences.get(sequenceId) ?? [],
+      activeExecutionCount: 0,
     });
   }
 
+  // 4. Populate activeExecutionCount via Select:COUNT on the inverted EXEC rows
+  await Promise.all(
+    results.map(async (info) => {
+      const r = await dynamoClient.send(
+        new QueryCommand({
+          TableName: config.tableName,
+          KeyConditionExpression: "PK = :pk",
+          ExpressionAttributeValues: marshall({ ":pk": `EXEC#${info.sequenceId}` }),
+          Select: "COUNT",
+        }),
+      );
+      info.activeExecutionCount = r.Count ?? 0;
+    }),
+  );
+
   return results.sort((a, b) => a.sequenceId.localeCompare(b.sequenceId));
+}
+
+// ── list_sequence_subscribers ────────────────────────────────────────────────
+
+export async function listSequenceSubscribers(
+  config: McpConfig,
+  sequenceId: string,
+  limit: number = 50,
+): Promise<{
+  sequenceId: string;
+  activeCount: number;
+  subscribers: SequenceSubscriber[];
+}> {
+  const db = getDynamo(config.region);
+  const result = await db.send(
+    new QueryCommand({
+      TableName: config.tableName,
+      KeyConditionExpression: "PK = :pk",
+      ExpressionAttributeValues: marshall({ ":pk": `EXEC#${sequenceId}` }),
+      Limit: limit,
+    }),
+  );
+
+  const subscribers: SequenceSubscriber[] = (result.Items ?? []).map((raw) => {
+    const item = unmarshall(raw);
+    return {
+      email: item.email as string,
+      executionArn: item.executionArn as string,
+      startedAt: item.startedAt as string,
+    };
+  });
+
+  // Newest-started first
+  subscribers.sort((a, b) => b.startedAt.localeCompare(a.startedAt));
+
+  return {
+    sequenceId,
+    activeCount: subscribers.length,
+    subscribers,
+  };
 }
 
 // ── export_sequence ──────────────────────────────────────────────────────────

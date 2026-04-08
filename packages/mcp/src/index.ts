@@ -16,7 +16,7 @@ import { listSuppressed, removeSuppression } from "./tools/suppression.js";
 import { getSubscriberEvents, getTemplateEvents, getSequenceEvents } from "./tools/engagement.js";
 import { listTemplates, previewTemplate, validateTemplate } from "./tools/templates.js";
 import { getFailedExecutions, getDeliveryStats } from "./tools/system.js";
-import { listSequences, exportSequence } from "./tools/sequences.js";
+import { listSequences, exportSequence, listSequenceSubscribers } from "./tools/sequences.js";
 import { sendBroadcast, getBroadcast, listBroadcasts } from "./tools/broadcast.js";
 
 const config = resolveConfig();
@@ -329,6 +329,26 @@ server.registerTool(
       {
         type: "text",
         text: JSON.stringify(await exportSequence(config, sequenceId), null, 2),
+      },
+    ],
+  }),
+);
+
+server.registerTool(
+  "list_sequence_subscribers",
+  {
+    description:
+      "List subscribers currently running in a sequence (active executions, newest first)",
+    inputSchema: {
+      sequenceId: z.string().describe("The sequence ID (kebab-case)"),
+      limit: z.number().int().min(1).max(100).optional().default(50),
+    },
+  },
+  async ({ sequenceId, limit }) => ({
+    content: [
+      {
+        type: "text",
+        text: JSON.stringify(await listSequenceSubscribers(config, sequenceId, limit), null, 2),
       },
     ],
   }),

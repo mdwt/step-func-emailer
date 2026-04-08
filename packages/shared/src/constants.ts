@@ -4,6 +4,9 @@ export const SENT_SK_PREFIX = "SENT#" as const;
 export const SUPPRESSION_SK = "SUPPRESSION" as const;
 
 export const subscriberPK = (email: string): string => `SUB#${email}`;
+// EXEC#<sequenceId> — used two ways:
+//   - SK on subscriber-side rows (PK = SUB#<email>)
+//   - PK on inverted sequence-side rows (SK = SUB#<email>) — see SequenceExecutionItem
 export const executionSK = (sequenceId: string): string => `${EXEC_SK_PREFIX}${sequenceId}`;
 export const sentSK = (isoTimestamp: string): string => `${SENT_SK_PREFIX}${isoTimestamp}`;
 

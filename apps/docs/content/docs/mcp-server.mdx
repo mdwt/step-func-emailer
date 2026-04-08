@@ -49,6 +49,14 @@ Required environment variables (read from `.env` at repo root):
 | `get_sequence_events(sequenceId, eventType?, startDate?, endDate?, limit?)`  | Scan events for a sequence                                             |
 | `get_delivery_stats(startDate, endDate)`                                     | Aggregate counts by event type                                         |
 
+### Sequences
+
+| Tool                                                  | Description                                                                                                                   |
+| ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `list_sequences()`                                    | List deployed sequences (template prefixes + state machines), each with `activeExecutionCount` of subscribers currently in it |
+| `list_sequence_subscribers(sequenceId, limit?)`       | Show subscribers currently running in a sequence (active executions, newest first). Powered by the inverted `EXEC#<seq>` row. |
+| `export_sequence(sequenceId)`                         | Reverse-parse a deployed sequence's ASL back to a `SequenceDefinition`, including templates and EventBridge trigger config    |
+
 ### Templates
 
 | Tool                                                            | Description                                               |
@@ -77,6 +85,10 @@ Required environment variables (read from `.env` at repo root):
 ### "How is the onboarding sequence performing?"
 
 Claude uses `get_delivery_stats` and `get_template_events` to pull open rates, click rates, and bounce rates for each template in the sequence.
+
+### "Who is currently in the onboarding sequence?"
+
+Claude uses `list_sequence_subscribers` to return a list of subscribers with active executions in `onboarding`, including when each one started and their execution ARN. The `/inspect-sequence` skill wraps this with engagement and recent failures.
 
 ### "Show me everyone who bounced this week"
 

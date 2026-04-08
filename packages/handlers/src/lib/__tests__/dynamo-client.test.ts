@@ -49,6 +49,11 @@ vi.mock("@aws-sdk/client-dynamodb", () => ({
       super("BatchGetItem", input);
     }
   },
+  TransactWriteItemsCommand: class extends MockCommand {
+    constructor(input: unknown) {
+      super("TransactWriteItems", input);
+    }
+  },
 }));
 
 const {
@@ -192,7 +197,7 @@ describe("getExecution", () => {
 });
 
 describe("putExecution", () => {
-  it("stores execution with correct keys", async () => {
+  it("transactionally writes subscriber-side and sequence-side rows", async () => {
     mockSend.mockResolvedValueOnce({});
 
     await putExecution(
@@ -203,27 +208,42 @@ describe("putExecution", () => {
     );
 
     const cmd = mockSend.mock.calls[0][0];
-    expect(cmd._type).toBe("PutItem");
-    const item = unmarshall(cmd.input.Item);
-    expect(item.PK).toBe("SUB#user@example.com");
-    expect(item.SK).toBe("EXEC#onboarding");
-    expect(item.executionArn).toBe("arn:aws:states:us-east-1:123:execution:abc");
-    expect(item.sequenceId).toBe("onboarding");
-    expect(item.startedAt).toBeTruthy();
+    expect(cmd._type).toBe("TransactWriteItems");
+    expect(cmd.input.TransactItems).toHaveLength(2);
+
+    const subItem = unmarshall(cmd.input.TransactItems[0].Put.Item);
+    expect(subItem.PK).toBe("SUB#user@example.com");
+    expect(subItem.SK).toBe("EXEC#onboarding");
+    expect(subItem.executionArn).toBe("arn:aws:states:us-east-1:123:execution:abc");
+    expect(subItem.sequenceId).toBe("onboarding");
+    expect(subItem.startedAt).toBeTruthy();
+
+    const seqItem = unmarshall(cmd.input.TransactItems[1].Put.Item);
+    expect(seqItem.PK).toBe("EXEC#onboarding");
+    expect(seqItem.SK).toBe("SUB#user@example.com");
+    expect(seqItem.email).toBe("user@example.com");
+    expect(seqItem.executionArn).toBe("arn:aws:states:us-east-1:123:execution:abc");
+    expect(seqItem.startedAt).toBe(subItem.startedAt);
   });
 });
 
 describe("deleteExecution", () => {
-  it("deletes with correct key", async () => {
+  it("transactionally deletes both subscriber-side and sequence-side rows", async () => {
     mockSend.mockResolvedValueOnce({});
 
     await deleteExecution("TestTable", "user@example.com", "onboarding");
 
     const cmd = mockSend.mock.calls[0][0];
-    expect(cmd._type).toBe("DeleteItem");
-    const key = unmarshall(cmd.input.Key);
-    expect(key.PK).toBe("SUB#user@example.com");
-    expect(key.SK).toBe("EXEC#onboarding");
+    expect(cmd._type).toBe("TransactWriteItems");
+    expect(cmd.input.TransactItems).toHaveLength(2);
+
+    const subKey = unmarshall(cmd.input.TransactItems[0].Delete.Key);
+    expect(subKey.PK).toBe("SUB#user@example.com");
+    expect(subKey.SK).toBe("EXEC#onboarding");
+
+    const seqKey = unmarshall(cmd.input.TransactItems[1].Delete.Key);
+    expect(seqKey.PK).toBe("EXEC#onboarding");
+    expect(seqKey.SK).toBe("SUB#user@example.com");
   });
 });
 

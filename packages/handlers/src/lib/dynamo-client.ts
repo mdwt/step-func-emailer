@@ -7,6 +7,7 @@ import {
   QueryCommand,
   ScanCommand,
   BatchGetItemCommand,
+  TransactWriteItemsCommand,
 } from "@aws-sdk/client-dynamodb";
 import type { AttributeValue } from "@aws-sdk/client-dynamodb";
 import { marshall, unmarshall } from "@aws-sdk/util-dynamodb";
@@ -168,16 +169,37 @@ export async function putExecution(
   executionArn: string,
 ): Promise<void> {
   logger.info("Storing execution", { email, sequenceId, executionArn });
+  const startedAt = new Date().toISOString();
   await dynamo.send(
-    new PutItemCommand({
-      TableName: tableName,
-      Item: marshall({
-        PK: subscriberPK(email),
-        SK: executionSK(sequenceId),
-        executionArn,
-        sequenceId,
-        startedAt: new Date().toISOString(),
-      }),
+    new TransactWriteItemsCommand({
+      TransactItems: [
+        // Subscriber-side row: "what sequences is alice in?"
+        {
+          Put: {
+            TableName: tableName,
+            Item: marshall({
+              PK: subscriberPK(email),
+              SK: executionSK(sequenceId),
+              executionArn,
+              sequenceId,
+              startedAt,
+            }),
+          },
+        },
+        // Inverted sequence-side row: "who is in sequence onboarding?"
+        {
+          Put: {
+            TableName: tableName,
+            Item: marshall({
+              PK: executionSK(sequenceId),
+              SK: subscriberPK(email),
+              email,
+              executionArn,
+              startedAt,
+            }),
+          },
+        },
+      ],
     }),
   );
 }
@@ -189,12 +211,27 @@ export async function deleteExecution(
 ): Promise<void> {
   logger.info("Deleting execution", { email, sequenceId });
   await dynamo.send(
-    new DeleteItemCommand({
-      TableName: tableName,
-      Key: marshall({
-        PK: subscriberPK(email),
-        SK: executionSK(sequenceId),
-      }),
+    new TransactWriteItemsCommand({
+      TransactItems: [
+        {
+          Delete: {
+            TableName: tableName,
+            Key: marshall({
+              PK: subscriberPK(email),
+              SK: executionSK(sequenceId),
+            }),
+          },
+        },
+        {
+          Delete: {
+            TableName: tableName,
+            Key: marshall({
+              PK: executionSK(sequenceId),
+              SK: subscriberPK(email),
+            }),
+          },
+        },
+      ],
     }),
   );
 }

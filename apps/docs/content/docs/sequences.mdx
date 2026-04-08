@@ -256,12 +256,14 @@ CDK scans `sequences/*/sequence.config.ts` at deploy time. You never need to man
 ## Execution lifecycle
 
 1. **Event arrives** → EventBridge matches `detailType` → starts Step Functions execution
-2. **Register** → SendEmailFn upserts subscriber profile, checks `unsubscribed`/`suppressed` flags, records active execution. If the subscriber is unsubscribed or suppressed, registration throws and the execution fails immediately.
+2. **Register** → SendEmailFn upserts subscriber profile, checks `unsubscribed`/`suppressed` flags, records the active execution. The execution is recorded as **two transactional rows**: a subscriber-side row (`PK = SUB#email, SK = EXEC#sequenceId`) and an inverted sequence-side row (`PK = EXEC#sequenceId, SK = SUB#email`). The two writes are wrapped in a `TransactWriteItemsCommand` so they always succeed or fail together. If the subscriber is unsubscribed or suppressed, registration throws and the execution fails immediately.
 3. **Steps execute** → Send/wait/choice/condition steps run in order
-4. **Complete** → SendEmailFn deletes the execution record
+4. **Complete** → SendEmailFn deletes both execution rows transactionally
 5. **Timeout** → If the execution exceeds `timeoutMinutes`, Step Functions stops it
 
 If a subscriber is already in an active execution of the same sequence, the old execution is stopped and replaced with the new one.
+
+The inverted sequence-side row powers the [`list_sequence_subscribers` MCP tool](/docs/mcp-server#sequences) and the [`/inspect-sequence` skill](/docs/skills#inspect-sequence), which answer "who is currently in sequence X?" with a single Query — no GSI, no scan. See the [DynamoDB schema docs](/docs/dynamo-schema#main-table) for the row shapes.
 
 ## Visualizing sequences
 

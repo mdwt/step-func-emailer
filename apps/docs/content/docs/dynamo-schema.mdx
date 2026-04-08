@@ -7,18 +7,19 @@ Two tables: a main table (single-table design) for all subscriber state, and an 
 
 ## Main table
 
-All items are keyed by subscriber email or tag name. No GSIs - all access patterns are served by the primary key.
+All items are keyed by subscriber email, sequence ID, tag name, broadcast partition, or stats partition. No GSIs - reverse lookups (e.g. "all subscribers in sequence X") are served by inverted partner items rather than indexes.
 
 ### Key structure
 
-| PK                     | SK                                              | Item type                |
-| ---------------------- | ----------------------------------------------- | ------------------------ |
-| `SUB#user@example.com` | `PROFILE`                                       | Subscriber profile       |
-| `SUB#user@example.com` | `EXEC#onboarding`                               | Active execution         |
-| `SUB#user@example.com` | `SENT#2026-03-17T10:30:00.000Z`                 | Send log entry           |
-| `SUB#user@example.com` | `SUPPRESSION`                                   | Suppression record       |
-| `TAG#product-updates`  | `SUB#user@example.com`                          | Tag inverted index entry |
-| `BROADCAST`            | `2026-04-02T10:00:00.000Z#product-update-april` | Broadcast record         |
+| PK                     | SK                                              | Item type                          |
+| ---------------------- | ----------------------------------------------- | ---------------------------------- |
+| `SUB#user@example.com` | `PROFILE`                                       | Subscriber profile                 |
+| `SUB#user@example.com` | `EXEC#onboarding`                               | Active execution (subscriber-side) |
+| `EXEC#onboarding`      | `SUB#user@example.com`                          | Active execution (sequence-side)   |
+| `SUB#user@example.com` | `SENT#2026-03-17T10:30:00.000Z`                 | Send log entry                     |
+| `SUB#user@example.com` | `SUPPRESSION`                                   | Suppression record                 |
+| `TAG#product-updates`  | `SUB#user@example.com`                          | Tag inverted index entry           |
+| `BROADCAST`            | `2026-04-02T10:00:00.000Z#product-update-april` | Broadcast record                   |
 
 ### Key helper functions
 
@@ -52,7 +53,7 @@ broadcastSK("2026-04-02T10:00:00.000Z", "product-update-april"); // → "2026-04
 }
 ```
 
-**EXEC#\<sequenceId\>**
+**EXEC#\<sequenceId\>** (subscriber-side)
 
 ```typescript
 {
@@ -63,6 +64,22 @@ broadcastSK("2026-04-02T10:00:00.000Z", "product-update-april"); // → "2026-04
   startedAt: "2026-03-01T00:00:00.000Z",
 }
 ```
+
+**EXEC#\<sequenceId\>** (sequence-side, inverted partner)
+
+Written transactionally alongside the subscriber-side row by `putExecution` and deleted together by `deleteExecution`. Lets you Query "who is currently in sequence X?" without a GSI or scan — same pattern as the [tag inverted index](#tag-items-inverted-index) below.
+
+```typescript
+{
+  PK: "EXEC#onboarding",
+  SK: "SUB#user@example.com",
+  email: "user@example.com",
+  executionArn: "arn:aws:states:...",
+  startedAt: "2026-03-01T00:00:00.000Z",
+}
+```
+
+The two rows are kept consistent by wrapping every put and delete in a `TransactWriteItemsCommand` — ACID guarantees at the DynamoDB layer mean the inspector view can never drift out of sync with the subscriber's view. The MCP `list_sequence_subscribers` tool reads these rows directly via `Query(PK = "EXEC#<sequenceId>")`, and `list_sequences` derives `activeExecutionCount` per sequence via a `Select: COUNT` query against the same partition.
 
 **SENT#\<timestamp\>**
 
@@ -150,20 +167,22 @@ Counters use atomic `UpdateItem ADD` so concurrent updates are safe. They are **
 
 ### Access patterns
 
-| Pattern                       | Key condition                                                  |
-| ----------------------------- | -------------------------------------------------------------- |
-| Get subscriber profile        | `PK = SUB#email, SK = PROFILE`                                 |
-| Get active execution          | `PK = SUB#email, SK = EXEC#sequenceId`                         |
-| List all executions           | `PK = SUB#email, SK begins_with EXEC#`                         |
-| Get send history              | `PK = SUB#email, SK begins_with SENT#`                         |
-| Check if sent                 | `PK = SUB#email, SK begins_with SENT#` + filter on templateKey |
-| Get suppression               | `PK = SUB#email, SK = SUPPRESSION`                             |
-| Get everything for subscriber | `PK = SUB#email` (no SK condition)                             |
-| Get all subscribers for a tag | `PK = TAG#tagName` (returns all SUB# items)                    |
-| Get broadcast by ID           | `PK = BROADCAST` + filter on `broadcastId`                     |
-| List broadcasts (time-sorted) | `PK = BROADCAST, ScanIndexForward = false`                     |
-| List broadcasts in date range | `PK = BROADCAST, SK BETWEEN <start> AND <end>`                 |
-| Get counters for a sequence/broadcast | `PK = STATS#sequenceId, SK = COUNTERS`                 |
+| Pattern                                | Key condition                                                  |
+| -------------------------------------- | -------------------------------------------------------------- |
+| Get subscriber profile                 | `PK = SUB#email, SK = PROFILE`                                 |
+| Get active execution                   | `PK = SUB#email, SK = EXEC#sequenceId`                         |
+| List all executions for subscriber     | `PK = SUB#email, SK begins_with EXEC#`                         |
+| List all subscribers in sequence       | `PK = EXEC#sequenceId` (returns all SUB# items)                |
+| Count subscribers in sequence          | `PK = EXEC#sequenceId, Select = COUNT`                         |
+| Get send history                       | `PK = SUB#email, SK begins_with SENT#`                         |
+| Check if sent                          | `PK = SUB#email, SK begins_with SENT#` + filter on templateKey |
+| Get suppression                        | `PK = SUB#email, SK = SUPPRESSION`                             |
+| Get everything for subscriber          | `PK = SUB#email` (no SK condition)                             |
+| Get all subscribers for a tag          | `PK = TAG#tagName` (returns all SUB# items)                    |
+| Get broadcast by ID                    | `PK = BROADCAST` + filter on `broadcastId`                     |
+| List broadcasts (time-sorted)          | `PK = BROADCAST, ScanIndexForward = false`                     |
+| List broadcasts in date range          | `PK = BROADCAST, SK BETWEEN <start> AND <end>`                 |
+| Get counters for a sequence/broadcast  | `PK = STATS#sequenceId, SK = COUNTERS`                         |
 
 ### TTL
 

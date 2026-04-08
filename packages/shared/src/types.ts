@@ -29,6 +29,17 @@ export interface ActiveExecution {
   startedAt: string;
 }
 
+// Inverted-index row written alongside ActiveExecution by putExecution.
+// Lets us Query all subscribers currently in a sequence without a GSI.
+// Same pattern as TagItem.
+export interface SequenceExecutionItem {
+  PK: string; // EXEC#<sequenceId>
+  SK: string; // SUB#<email>
+  email: string;
+  executionArn: string;
+  startedAt: string;
+}
+
 // ── Send log ────────────────────────────────────────────────────────────────
 
 export interface SendLog {

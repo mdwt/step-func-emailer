@@ -79,6 +79,25 @@ Validates a sequence config is correct and deployable.
 
 Stops at the first failure with a clear error message and file path.
 
+### /inspect-sequence
+
+Read-only inspection of a deployed sequence — bundles active subscribers, recent engagement, and recent failures into a single view.
+
+```
+/inspect-sequence              # picks from deployed sequences interactively
+/inspect-sequence onboarding   # jumps straight to that sequence
+```
+
+**What it shows (in order):**
+
+1. **Pick a sequence** — if no ID is provided, lists all deployed sequences with `activeExecutionCount` so you can pick.
+2. **Active subscribers** — calls `list_sequence_subscribers` and renders a compact table of `email | startedAt | execution`, newest first.
+3. **Recent engagement** — calls `get_sequence_events(limit=20)` and aggregates by event type ("12 deliveries, 8 opens, 1 click, 0 bounces").
+4. **Recent failures** — calls `get_failed_executions(limit=5)` and surfaces them only if there are any.
+5. **Summary** — one-paragraph health readout that ties the phases together.
+
+**When to use:** Answering "who is in X?", "what's running?", "how is X doing?", or any other "current state of a sequence" question. The skill never mutates data — it's a pure read-only inspection.
+
 ### /deploy
 
 Full deployment pipeline with validation, build, and deploy.

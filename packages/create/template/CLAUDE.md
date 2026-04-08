@@ -19,6 +19,7 @@ This project is managed through Claude Code skills. When the user asks to deploy
 - `/create-sequence` - scaffold a new email sequence from a description
 - `/validate-sequence` - check sequence configs, templates, types, and CDK synth
 - `/deploy` - full deployment workflow (validate → build → confirm → deploy to AWS)
+- `/inspect-sequence` - read-only inspection of a deployed sequence (active subscribers, recent engagement, recent failures). Use when the user asks "who is in X?", "what's running?", or "how is X doing?"
 
 ### Build commands (used internally by skills)
 
