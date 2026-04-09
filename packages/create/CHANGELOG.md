@@ -1,5 +1,18 @@
 # create-mailshot
 
+## 1.8.0
+
+### Minor Changes
+
+- [`fd689ab`](https://github.com/mdwt/mailshot/commit/fd689ab6efff34fd9b5bea145d20a36c3f2e8a10) Thanks [@mdwt](https://github.com/mdwt)! - Publish Claude Code skills as a dedicated `@mailshot/skills` package. Scaffolded projects now refresh `.claude/skills/` automatically on `pnpm install` (postinstall hook), so framework upgrades keep skills in sync without manual steps. New `sync_skills` MCP tool exposes the same code path. The framework repo's root `.claude/skills/` is now a symlink to the canonical source so contributors can no longer drift from the user-facing copies.
+
+### Patch Changes
+
+- [`033a892`](https://github.com/mdwt/mailshot/commit/033a892ff4421d0fc52606bc4202033ada63342c) Thanks [@mdwt](https://github.com/mdwt)! - Fix scaffolded README example to use `pnpm --filter <name>` instead of `pnpm --filter @mailshot/<name>` — sequence packages have no namespace, so the old example was misleading and could cause AI-assisted scaffolding to incorrectly prefix sequence package names with `@mailshot/`.
+
+- Updated dependencies [[`fd689ab`](https://github.com/mdwt/mailshot/commit/fd689ab6efff34fd9b5bea145d20a36c3f2e8a10)]:
+  - @mailshot/skills@1.8.0
+
 ## 1.7.0
 
 ### Minor Changes
